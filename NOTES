@@ -1,0 +1,8 @@
+Creating a program that could process a vim macro
+and execute that macro on each line on a file
+
+-- Things to do --
+
+- Identify words
+- Commands: d,f,$,^,0
+
