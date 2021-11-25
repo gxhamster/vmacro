@@ -48,6 +48,8 @@ Line *eval_action_on_line(Line *l, Action *a);
 char *read_from_file(FILE *fp);
 Line *next_word_end(Line *l);
 Line *next_word_start(Line *l);
-Line *back_word_start(Line *l);
+Line *prev_word_start(Line *l);
+Line *next_char(Line *l);
+Line *prev_char(Line *l);
 
 #endif
