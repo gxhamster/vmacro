@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #define ERROR(s) fprintf(stderr, "ERROR: %s\n", s)
+#define IS_LINE_NULL(l, return_code) if (l == NULL) { ERROR("Line is NULL"); return return_code;}
 
 // All actions and movements
 enum { DELETE = 1, CHANGE };
@@ -44,6 +45,7 @@ typedef struct {
 Line process_line(char *buf_src, size_t size);
 Action process_actions(char *action_str, size_t len);
 Line *line_delete_word_at_cursor(Line *l);
+Line *line_delete_char_at_cursor(Line *l);
 Line *eval_action_on_line(Line *l, Action *a);
 char *read_from_file(FILE *fp);
 Line *next_word_end(Line *l);
@@ -51,5 +53,6 @@ Line *next_word_start(Line *l);
 Line *prev_word_start(Line *l);
 Line *next_char(Line *l);
 Line *prev_char(Line *l);
+size_t word_idx_from_cursor(Line *l);
 
 #endif

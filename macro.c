@@ -51,7 +51,7 @@ Action process_actions(char *action_str, size_t len)
     size_t count = (unsigned int)atoi(num_buffer);
     m.count = (count > 0) ? count : 0;
     a.mov = m;
-
+    
     return a;
 }
 
@@ -162,6 +162,57 @@ Line *next_word_start(Line *l)
     return l;
 }
 
+// Get the word idx in the line from positon of cursor
+// useful when calling any delete function
+// return idx if found if not return 0
+size_t word_idx_from_cursor(Line *l)
+{
+    IS_LINE_NULL(l, 0);
+
+    size_t i;
+    char *start;
+    char *end;
+    for (i = 0; i < l->len; i++) {
+        start = l->words[i].start;
+        end = l->words[i].end;
+        if (l->cursor >= start && l->cursor <= end) {
+            return i;
+        }
+    }
+
+    return 0;
+}
+
+// TODO: create function to delete a char from src
+Line *line_delete_char_at_cursor(Line *l)
+{
+    if (l == NULL) {
+        ERROR("Line is NULL");
+        return NULL;
+    }
+    
+    char new_src[l->len];
+    size_t new_src_count = 0;
+    char *delete_char = l->cursor;
+    size_t i;
+    for (i = 0; i < l->len; i++) {
+        if (&l->src[i] != delete_char) {
+            new_src[new_src_count] = l->src[i];
+            new_src_count++;
+        }
+    }
+    new_src[new_src_count] = '\0';
+    size_t offset = l->cursor - l->src;
+    Line l_new = process_line(new_src, new_src_count);
+    *l = l_new;
+
+    // TODO: Change the cur_word_idx if necessary (not sure)
+    l->cursor = l->src + offset;
+    l->cur_word_idx = word_idx_from_cursor(l); 
+    return l;
+}
+
+
 // Delete a word in a line at a certain index
 // This will also create a new src str the line points to
 Line *line_delete_word_at_cursor(Line *l)
@@ -225,16 +276,29 @@ Line *line_delete_word_at_cursor(Line *l)
     Line l_new = process_line(new_src, new_src_count);
     *l = l_new;
 
+    // FIXME: cur_word_idx should be set here (oops)
     l->cursor = l->src + offset;
+    l->cur_word_idx = word_idx_from_cursor(l); 
     return l;
 }
 
 // Execute an action on a line
 Line *eval_action_on_line(Line *l, Action *a)
 {
+    // TODO: Fixed this if else block mess
     // Only a movement
     if (a->identifier == 0) {
-        if (a->mov.command == WORD_FORWARD) {
+        if (a->mov.command == FORWARD) {
+            size_t i;
+            for (i = 0; i < a->mov.count; i++) {
+                next_char(l);
+            }
+        } else if (a->mov.command == BACKWARD) {
+            size_t i;
+            for (i = 0; i < a->mov.count; i++) {
+                prev_char(l);
+            }
+        } else if (a->mov.command == WORD_FORWARD) {
             size_t i;
             for (i = 0; i < a->mov.count; i++) {
                 next_word_start(l);
@@ -245,7 +309,6 @@ Line *eval_action_on_line(Line *l, Action *a)
                 prev_word_start(l);
             }
         }
-        
     } else if (a->command > 0) {
         if (a->command == DELETE) {
             if (a->mov.command == WORD_FORWARD) {
