@@ -50,6 +50,21 @@ Action process_actions(char *action_str, size_t len)
     return a;
 }
 
+// Move back to start of word
+Line *back_word_start(line *l)
+{
+    if (l->cur_word_idx - 1 < 0) {
+        ERROR("Reached start of words on line");
+        return NULL;
+    }
+    char *start = l->words[l->cur_word_idx -1 ].start;      
+    l->cursor = start;
+    l->cur_word_idx -= 1; 
+
+    return l;
+    
+}
+
 // Move to end of word 
 Line *next_word_end(Line *l)
 {
@@ -71,7 +86,6 @@ Line *next_word_end(Line *l)
 
     return l;
 }
-
 
 // Move cursor to next start of next word
 // If cursor is in the word move it to end of cur word
@@ -158,7 +172,26 @@ Line *line_delete_word_at_cursor(Line *l)
 // Execute an action on a line
 Line *eval_action_on_line(Line *l, Action *a)
 {
-    return NULL;
+    // Only a movement
+    if (a->identifier == 0) {
+        if (a->mov.command == WORD_FORWARD) {
+            size_t i;
+            for (i = 0; i < a->mov.count; i++) {
+                next_word_start(l);
+            }
+        }
+        
+    } else if (a->command > 0) {
+        if (a->command == DELETE) {
+            size_t i;
+            for (i = 0; i < a->mov.count; i++) {
+                line_delete_word_at_cursor(l);
+                next_word_start(l);
+            }
+        }
+
+    }
+    return l;
 }
 
 // Turn a line to Line structure
