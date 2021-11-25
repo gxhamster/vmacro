@@ -55,6 +55,32 @@ Action process_actions(char *action_str, size_t len)
     return a;
 }
 
+Line *prev_char(Line *l)
+{
+    if (l == NULL) {
+        ERROR("Line does not exist");
+        return NULL;
+    }
+    Word *word = &l->words[l->cur_word_idx];
+    Word *word_prev = ((int)l->cur_word_idx + -1 > 0) ? NULL : &l->words[l->cur_word_idx - 1];
+    bool is_word_prev = (word_prev == NULL) ? false : true;
+
+    char *new_cursor_pos = l->cursor - 1;
+    if (new_cursor_pos < &l->src[0]) {
+        ERROR("Cursor reached start of line");
+        return NULL;
+    }
+    
+    if (is_word_prev) {
+        if (new_cursor_pos < word->start && new_cursor_pos <= word_prev->end) {
+            l->cur_word_idx -= 1;
+        }
+    }
+    l->cursor -= 1;
+    
+    return l;
+}
+
 Line *next_char(Line *l)
 {
     if (l == NULL) {
@@ -77,7 +103,6 @@ Line *next_char(Line *l)
              l->cur_word_idx += 1; 
         }
     } 
-    
 
     l->cursor += 1;
 
