@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
-#include <stdlib.h>
+#include <stdlib.h> 
 #include "macro.h"
 
-const KeyVal mapped_actions[] = {
+static const KeyVal mapped_actions[] = {
     {'d', DELETE},
 };
 
-const KeyVal mapped_movements[] = {
+static const KeyVal mapped_movements[] = {
     {'l', FORWARD},
     {'h', BACKWARD},
     {'w', WORD_FORWARD},
@@ -150,7 +150,6 @@ Line *prev_char(Line *l)
     return l;
 }
 
-// TODO: if exceeded just put the cursor at last
 Line *next_char(Line *l)
 {
     if (l == NULL) {
@@ -426,7 +425,6 @@ Line process_line(char *buf_src, size_t size)
         ERROR("Buffer is empty");
         exit(-1);
     }
-    // Seperate the words in the line
     char *buf = malloc(size+2);
     strcpy(buf, buf_src);
 
@@ -435,7 +433,6 @@ Line process_line(char *buf_src, size_t size)
     line.cursor = buf;
     line.cur_word_idx = 0;
     line.n_words = 0;
-
 
     // TODO: implement way to find words without using strtok
     char *token;

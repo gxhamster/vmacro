@@ -17,9 +17,8 @@ void free_args(Args *args)
     args->file_name = NULL;
 }
 
-// Read from text from file
 #define MAX_BUF_READ 100
-char *read_from_file(FILE *fp, Args *args)
+static char *read_from_file(FILE *fp, Args *args)
 {
     if (fp == NULL) {
         ERROR("File handler is not valid");
@@ -42,14 +41,14 @@ char *read_from_file(FILE *fp, Args *args)
     return NULL;
 }
 
-void print_help() 
+static void print_help() 
 {
     const char help[] = "Usage: macro -d [delimiter] -f [filename] -m [macro]";
     printf("%s\n", help);
 }
 
 #define MAX_ACTIONS 10
-Args handle_args(int argc, char **argv)
+static Args handle_args(int argc, char **argv)
 {
     if (argv == NULL) {
         ERROR("Arguments not given");
@@ -87,7 +86,6 @@ Args handle_args(int argc, char **argv)
         }
     }
 
-    // Remember to free !
     char **actions_str = (char **)malloc(sizeof(char **) * MAX_ACTIONS);
     size_t actions_str_count = 0;
     char *token;
@@ -126,20 +124,8 @@ Args handle_args(int argc, char **argv)
 
 }
 
-// TODO: Handle arguments
-// Macros should be seperated bu a ;
-// ./macro -d " " "macro macro" [file] 
-// -d is delim
 int main(int argc, char **argv)
 {
-    //char *str = "hello world again it's me Mario";
-    //Line l = process_line(str, strlen(str));
-    //Action a1 = process_actions("2l", 2);
-    //Action a2 = process_actions("d2w", 3);
-    //eval_action_on_line(&l, &a1);
-    //eval_action_on_line(&l, &a2);
-    //printf("Line: |%s|\n", l.src);
-
     Args args = handle_args(argc, argv);
     FILE *fp = fopen(args.file_name, "r");
     read_from_file(fp, &args);
