@@ -11,6 +11,12 @@ typedef struct {
 } Args;
 
 
+void free_args(Args *args)
+{
+    free(args->actions_str);
+    args->file_name = NULL;
+}
+
 // Read from text from file
 #define MAX_BUF_READ 100
 char *read_from_file(FILE *fp, Args *args)
@@ -137,7 +143,8 @@ int main(int argc, char **argv)
     Args args = handle_args(argc, argv);
     FILE *fp = fopen(args.file_name, "r");
     read_from_file(fp, &args);
-    
+    free_args(&args);
+
     return 0;
 }
 

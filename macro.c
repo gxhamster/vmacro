@@ -134,8 +134,10 @@ Line *prev_char(Line *l)
 
     char *new_cursor_pos = l->cursor - 1;
     if (new_cursor_pos < &l->src[0]) {
-        ERROR("Cursor reached start of line");
-        return NULL;
+        // ERROR("Cursor reached start of line");
+        l->cursor = l->src;
+        l->cur_word_idx = 0;
+        return l;
     }
 
     if (is_word_prev) {
@@ -162,8 +164,10 @@ Line *next_char(Line *l)
 
     char *next_cursor_pos = l->cursor + 1;
     if (next_cursor_pos > &l->src[l->len - 1]) {
-        ERROR("Cursor reached end of line");
-        return NULL;
+        // ERROR("cursor reached end of line");
+        l->cursor = &l->src[l->len -1];
+        l->cur_word_idx = l->n_words - 1;
+        return l;
     }
 
     if (is_word_next) {
@@ -182,8 +186,10 @@ Line *prev_word_start(Line *l)
 {
     // Because size_t is an unsigned int so cast to (int)
     if ((int)l->cur_word_idx - 1 < 0) {
-        ERROR("Reached start of words on line");
-        return NULL;
+        // ERROR("Reached start of words on line");
+        l->cursor = l->src;
+        l->cur_word_idx = 0;
+        return l;
     }
     char *start = l->words[l->cur_word_idx - 1 ].start;      
     l->cursor = start;
@@ -204,8 +210,10 @@ Line *next_word_end(Line *l)
         l->cursor = cur_word->end;
     } else {
         if (l->cur_word_idx + 1 > l->n_words - 1) {
-            ERROR("Reached end of words on line");
-            return NULL;
+            // ERROR("Reached end of words on line");
+            l->cursor = l->words[l->n_words - 1].end;
+            l->cur_word_idx = l->n_words - 1;
+            return l;
         }
         next_word = &l->words[l->cur_word_idx + 1];
         l->cursor = next_word->end; 
@@ -220,8 +228,10 @@ Line *next_word_end(Line *l)
 Line *next_word_start(Line *l)
 {
     if (l->cur_word_idx + 1 > l->n_words - 1) {
-        ERROR("Reached end of words on line");
-        return NULL;
+        // ERROR("Reached end of words on line");
+        l->cursor = l->words[l->n_words - 1].start;
+        l->cur_word_idx = l->n_words - 1;
+        return l;
     }
     char *start = l->words[l->cur_word_idx+1].start;      
     l->cursor = start;
@@ -309,7 +319,7 @@ Line *line_delete_word_at_cursor(Line *l)
         start = word->end;
         end = (!is_last_word) ? word_next->start - 1 : word->end;
     } else {
-        ERROR("Cursor is not at this word");
+        ERROR("Cursor is not at a word, most likely a whitespace");
         return NULL;
     }
 
@@ -377,7 +387,6 @@ Line *eval_action_on_line(Line *l, Action *a)
                 size_t i;
                 for (i = 0; i < a->mov.count; i++) {
                     line_delete_word_at_cursor(l);
-                    //next_word_start(l);
                 }
             } else if (a->mov.command == WORD_BACKWARD) {
                 size_t i;

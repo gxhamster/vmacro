@@ -5,6 +5,6 @@ and execute that macro on each line on a file
 
 -- Things to do --
 
-- Identify words
+- Identify words (DONE)
 - Commands: d,f,$,^,0
 
