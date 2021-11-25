@@ -2,17 +2,25 @@
 #define MACRO_H
 
 #include <stdlib.h>
+#include <stdbool.h>
 
 #define ERROR(s) fprintf(stderr, "ERROR: %s\n", s)
 #define IS_LINE_NULL(l, return_code) if (l == NULL) { ERROR("Line is NULL"); return return_code;}
 
 // All actions and movements
-enum { DELETE = 1, CHANGE };
-enum { FORWARD = 1, BACKWARD, WORD_FORWARD, WORD_BACKWARD }; 
+enum { DELETE = 1 };
+enum { FORWARD = 1, BACKWARD, WORD_FORWARD, WORD_BACKWARD, FIND, TILL }; 
+
+typedef struct {
+    char key;
+    int value;
+} KeyVal;
+
 
 typedef struct {
     char identifier;
     int command;
+    char arg;
     size_t count;
 } Movement;
 
@@ -54,5 +62,9 @@ Line *prev_word_start(Line *l);
 Line *next_char(Line *l);
 Line *prev_char(Line *l);
 size_t word_idx_from_cursor(Line *l);
+bool is_action(char c);
+bool is_movement(char c);
+int movement_get_value_for_key(char key);
+int action_get_value_for_key(char key);
 
 #endif

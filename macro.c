@@ -4,6 +4,71 @@
 #include <stdlib.h>
 #include "macro.h"
 
+const KeyVal mapped_actions[] = {
+    {'d', DELETE},
+};
+
+const KeyVal mapped_movements[] = {
+    {'l', FORWARD},
+    {'h', BACKWARD},
+    {'w', WORD_FORWARD},
+    {'b', WORD_BACKWARD},
+    {'f', FIND},
+    {'t', TILL},
+};
+
+bool is_movement(char c)
+{
+    size_t keyval_len;
+    keyval_len = sizeof(mapped_movements) / sizeof(KeyVal);
+    
+    size_t i;
+    for (i = 0; i < keyval_len; i++) {
+        if (c == mapped_movements[i].key) 
+            return true;
+    }
+    return false;
+}
+
+bool is_action(char c)
+{
+    size_t keyval_len;
+    keyval_len = sizeof(mapped_actions) / sizeof(KeyVal);
+    
+    size_t i;
+    for (i = 0; i < keyval_len; i++) {
+        if (c == mapped_actions[i].key) 
+            return true;
+    }
+    return false;
+}
+
+int movement_get_value_for_key(char key)
+{
+    size_t keyval_len;
+    keyval_len = sizeof(mapped_movements) / sizeof(KeyVal);
+    
+    size_t i;
+    for (i = 0; i < keyval_len; i++) {
+        if (key == mapped_movements[i].key) 
+            return mapped_movements[i].value;
+    }
+    return 0;
+}
+
+int action_get_value_for_key(char key)
+{
+    size_t keyval_len;
+    keyval_len = sizeof(mapped_actions) / sizeof(KeyVal);
+    
+    size_t i;
+    for (i = 0; i < keyval_len; i++) {
+        if (key == mapped_actions[i].key) 
+            return mapped_actions[i].value;
+    }
+    return 0;
+}
+
 // Takes an string of action and identifies them which can be
 // executed on a line
 Action process_actions(char *action_str, size_t len)
@@ -13,45 +78,41 @@ Action process_actions(char *action_str, size_t len)
         exit(-1);
     }
 
-    Action a;
-    Movement m;
+    Action a = {0};
+    Movement m = {0};
     char num_buffer[10] = {0};
     size_t num_buffer_count = 0;
+    bool found_action = false;
+    bool found_movement = false;
     size_t i;
+    // d3w
     for (i = 0; i < len; i++) {
-        printf("%c\n", action_str[i]); 
-        switch (action_str[i]) {
-            case 'd':
-                a.identifier = 'd';
-                a.command = DELETE;
-                break;
-            case 'w':
-                m.identifier = 'w';
-                m.command = WORD_FORWARD;
-                break;
-            case 'b':
-                m.identifier = 'b';
-                m.command = WORD_BACKWARD;
-                break;
-            case 'h':
-                m.identifier = 'h';
-                m.command = BACKWARD;
-                break;
-            case 'l':
-                m.identifier = 'l';
-                m.command = FORWARD;
-                break;
-            default:
-                num_buffer[num_buffer_count] = action_str[i];
-                num_buffer_count++;
-                break;
-
+        // If a number 
+        if (action_str[i] >= '0' && action_str[i] <= '9') {
+            num_buffer[num_buffer_count] = action_str[i];
+            num_buffer_count++;
+        }  
+        if (found_action == false) {
+            if (is_action(action_str[i])) {
+                a.identifier = action_str[i];
+                a.command = action_get_value_for_key(action_str[i]);
+                found_action = true;
+            }
+        }  
+        if (found_movement == false) {
+            if (is_movement(action_str[i])) {
+                m.identifier = action_str[i];
+                m.command = movement_get_value_for_key(action_str[i]);
+                found_movement = true;
+            }
+        } else if (found_movement) {
+            m.arg = action_str[i];
         }
     }
     size_t count = (unsigned int)atoi(num_buffer);
     m.count = (count > 0) ? count : 0;
     a.mov = m;
-    
+
     return a;
 }
 
@@ -70,14 +131,14 @@ Line *prev_char(Line *l)
         ERROR("Cursor reached start of line");
         return NULL;
     }
-    
+
     if (is_word_prev) {
         if (new_cursor_pos < word->start && new_cursor_pos <= word_prev->end) {
             l->cur_word_idx -= 1;
         }
     }
     l->cursor -= 1;
-    
+
     return l;
 }
 
@@ -97,10 +158,10 @@ Line *next_char(Line *l)
         ERROR("Cursor reached end of line");
         return NULL;
     }
-    
+
     if (is_word_next) {
         if (next_cursor_pos > word->end && next_cursor_pos >= word_next->start) {
-             l->cur_word_idx += 1; 
+            l->cur_word_idx += 1; 
         }
     } 
 
@@ -122,7 +183,7 @@ Line *prev_word_start(Line *l)
     l->cur_word_idx -= 1; 
 
     return l;
-    
+
 }
 
 // Move to end of word 
@@ -186,11 +247,8 @@ size_t word_idx_from_cursor(Line *l)
 // TODO: create function to delete a char from src
 Line *line_delete_char_at_cursor(Line *l)
 {
-    if (l == NULL) {
-        ERROR("Line is NULL");
-        return NULL;
-    }
-    
+    IS_LINE_NULL(l, NULL);
+
     char new_src[l->len];
     size_t new_src_count = 0;
     char *delete_char = l->cursor;
@@ -217,11 +275,8 @@ Line *line_delete_char_at_cursor(Line *l)
 // This will also create a new src str the line points to
 Line *line_delete_word_at_cursor(Line *l)
 {
+    IS_LINE_NULL(l, NULL);
 
-    if (l == NULL) {
-        ERROR("Line is NULL");
-        return NULL;
-    }
     size_t word_idx = l->cur_word_idx;
     if (word_idx > l->n_words-1) {
         ERROR("Word index out of range");
@@ -231,7 +286,7 @@ Line *line_delete_word_at_cursor(Line *l)
     Word *word, *word_next;
     word = &l->words[word_idx];
     word_next = (word_idx+1 < l->n_words - 1) ? &l->words[word_idx+1] : NULL;
-    
+
     bool is_last_word = (!word_next) ? true : false;
 
     char *start;
@@ -250,11 +305,11 @@ Line *line_delete_word_at_cursor(Line *l)
         ERROR("Cursor is not at this word");
         return NULL;
     }
-    
+
     size_t del_len = end - start + 1;
     char new_src[l->len - del_len];
     size_t new_src_count = 0;
-    
+
     if (!is_last_word) {
         end = word_next->start - 1;
     }
@@ -323,8 +378,24 @@ Line *eval_action_on_line(Line *l, Action *a)
                     line_delete_word_at_cursor(l);
                     prev_word_start(l);
                 }
-
+            } else if (a->mov.command == FORWARD) {
+                size_t i;
+                for (i = 0; i < a->mov.count; i++) {
+                    line_delete_char_at_cursor(l);
+                }
+            } else if (a->mov.command == BACKWARD) {
+                size_t i;
+                char *initial_cursor_pos = l->cursor;
+                for (i = 0; i < a->mov.count; i++) {
+                    prev_char(l);
+                }
+                if (l->cursor < initial_cursor_pos) {
+                    for (i = 0; i < a->mov.count; i++) {
+                        line_delete_char_at_cursor(l);
+                    }
+                }
             }
+
         }
 
     }
