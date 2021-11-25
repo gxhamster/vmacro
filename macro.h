@@ -24,7 +24,6 @@ typedef struct {
     size_t count;
 } Movement;
 
-// d2w -> delete two words
 typedef struct {
     char identifier;
     int command;
@@ -55,7 +54,6 @@ Action process_actions(char *action_str, size_t len);
 Line *line_delete_word_at_cursor(Line *l);
 Line *line_delete_char_at_cursor(Line *l);
 Line *eval_action_on_line(Line *l, Action *a);
-char *read_from_file(FILE *fp);
 Line *next_word_end(Line *l);
 Line *next_word_start(Line *l);
 Line *prev_word_start(Line *l);
@@ -66,5 +64,6 @@ bool is_action(char c);
 bool is_movement(char c);
 int movement_get_value_for_key(char key);
 int action_get_value_for_key(char key);
+void free_line(Line *l);
 
 #endif

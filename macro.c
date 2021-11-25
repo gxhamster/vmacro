@@ -17,6 +17,12 @@ const KeyVal mapped_movements[] = {
     {'t', TILL},
 };
 
+void free_line(Line *l)
+{
+    memset(l->words, 0, MAX_WORDS_IN_LINE * sizeof(Word));
+    free(l->src);
+}
+
 bool is_movement(char c)
 {
     size_t keyval_len;
@@ -110,7 +116,7 @@ Action process_actions(char *action_str, size_t len)
         }
     }
     size_t count = (unsigned int)atoi(num_buffer);
-    m.count = (count > 0) ? count : 0;
+    m.count = (count > 0) ? count : 1;
     a.mov = m;
 
     return a;
@@ -142,6 +148,7 @@ Line *prev_char(Line *l)
     return l;
 }
 
+// TODO: if exceeded just put the cursor at last
 Line *next_char(Line *l)
 {
     if (l == NULL) {
@@ -271,7 +278,7 @@ Line *line_delete_char_at_cursor(Line *l)
 }
 
 
-// Delete a word in a line at a certain index
+// Delete a word in a line 
 // This will also create a new src str the line points to
 Line *line_delete_word_at_cursor(Line *l)
 {
@@ -325,13 +332,12 @@ Line *line_delete_word_at_cursor(Line *l)
     // Offset to move cursor to point word was deleted
     char *cursor_pos = l->cursor;
     char *src = l->src;
-    size_t offset = cursor_pos - src - 1;
+    size_t offset = cursor_pos - src;
 
     // Reproduce the line structure becaus src is changed
     Line l_new = process_line(new_src, new_src_count);
     *l = l_new;
 
-    // FIXME: cur_word_idx should be set here (oops)
     l->cursor = l->src + offset;
     l->cur_word_idx = word_idx_from_cursor(l); 
     return l;
@@ -365,12 +371,13 @@ Line *eval_action_on_line(Line *l, Action *a)
             }
         }
     } else if (a->command > 0) {
+        // If there is an action
         if (a->command == DELETE) {
             if (a->mov.command == WORD_FORWARD) {
                 size_t i;
                 for (i = 0; i < a->mov.count; i++) {
                     line_delete_word_at_cursor(l);
-                    next_word_start(l);
+                    //next_word_start(l);
                 }
             } else if (a->mov.command == WORD_BACKWARD) {
                 size_t i;
@@ -411,7 +418,7 @@ Line process_line(char *buf_src, size_t size)
         exit(-1);
     }
     // Seperate the words in the line
-    char *buf = malloc(size+1);
+    char *buf = malloc(size+2);
     strcpy(buf, buf_src);
 
     Line line;
@@ -443,23 +450,3 @@ Line process_line(char *buf_src, size_t size)
 
     return line;
 }
-
-// Read from text from file
-#define MAX_BUF_READ 100
-char *read_from_file(FILE *fp)
-{
-    if (fp == NULL) {
-        ERROR("File handler is not valid");
-        exit(-1);
-    }
-    char buf[MAX_BUF_READ];
-    while (fgets(buf, MAX_BUF_READ, fp) != NULL) {
-        buf[strcspn(buf, "\n")] = 0;
-        process_line(buf, strlen(buf));
-    }
-
-    fclose(fp);
-    return NULL;
-}
-
-
