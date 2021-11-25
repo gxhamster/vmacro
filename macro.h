@@ -7,7 +7,7 @@
 
 // All actions and movements
 enum { DELETE = 1, CHANGE };
-enum { WORD_FORWARD = 1, WORD_BACKWARD }; 
+enum { FORWARD = 1, BACKWARD, WORD_FORWARD, WORD_BACKWARD }; 
 
 typedef struct {
     char identifier;

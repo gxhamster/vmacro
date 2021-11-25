@@ -33,6 +33,14 @@ Action process_actions(char *action_str, size_t len)
                 m.identifier = 'b';
                 m.command = WORD_BACKWARD;
                 break;
+            case 'h':
+                m.identifier = 'h';
+                m.command = BACKWARD;
+                break;
+            case 'l':
+                m.identifier = 'l';
+                m.command = FORWARD;
+                break;
             default:
                 num_buffer[num_buffer_count] = action_str[i];
                 num_buffer_count++;
@@ -48,7 +56,7 @@ Action process_actions(char *action_str, size_t len)
 }
 
 // Move back to start of word
-Line *back_word_start(Line *l)
+Line *prev_word_start(Line *l)
 {
     // Because size_t is an unsigned int so cast to (int)
     if ((int)l->cur_word_idx - 1 < 0) {
@@ -180,7 +188,7 @@ Line *eval_action_on_line(Line *l, Action *a)
         } else if (a->mov.command == WORD_BACKWARD) {
             size_t i;
             for (i = 0; i < a->mov.count; i++) {
-                back_word_start(l);
+                prev_word_start(l);
             }
         }
         
@@ -196,7 +204,7 @@ Line *eval_action_on_line(Line *l, Action *a)
                 size_t i;
                 for (i = 0; i < a->mov.count; i++) {
                     line_delete_word_at_cursor(l);
-                    back_word_start(l);
+                    prev_word_start(l);
                 }
 
             }
