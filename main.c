@@ -7,8 +7,10 @@ int main()
 {
     char *str = "hello world again it's me Mario";
     Line l = process_line(str, strlen(str));   
-    Action a = process_actions("d3w", 2);
+    Action a = process_actions("4w", 2);
+    Action a1 = process_actions("3b", 2);
     eval_action_on_line(&l, &a);
+    eval_action_on_line(&l, &a1);
 
     printf("Line: %s\n", l.cursor);
 

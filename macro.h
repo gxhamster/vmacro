@@ -6,7 +6,9 @@
 #define ERROR(s) fprintf(stderr, "ERROR: %s\n", s)
 
 // All actions and movements
-enum { DELETE = 1, CHANGE, MOVE, WORD_FORWARD, WORD_BACKWARD }; 
+enum { DELETE = 1, CHANGE };
+enum { WORD_FORWARD = 1, WORD_BACKWARD }; 
+
 typedef struct {
     char identifier;
     int command;
@@ -46,5 +48,6 @@ Line *eval_action_on_line(Line *l, Action *a);
 char *read_from_file(FILE *fp);
 Line *next_word_end(Line *l);
 Line *next_word_start(Line *l);
+Line *back_word_start(Line *l);
 
 #endif
