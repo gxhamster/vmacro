@@ -1,3 +1,5 @@
+This does not implement the movements and actions 
+exactly like vim
 Creating a program that could process a vim macro
 and execute that macro on each line on a file
 
