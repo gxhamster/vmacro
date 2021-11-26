@@ -91,7 +91,6 @@ Action process_actions(char *action_str, size_t len)
     bool found_action = false;
     bool found_movement = false;
     size_t i;
-    // d3w
     for (i = 0; i < len; i++) {
         // If a number 
         if (action_str[i] >= '0' && action_str[i] <= '9') {
@@ -260,7 +259,6 @@ size_t word_idx_from_cursor(Line *l)
     return 0;
 }
 
-// TODO: create function to delete a char from src
 Line *line_delete_char_at_cursor(Line *l)
 {
     IS_LINE_NULL(l, NULL);
@@ -280,7 +278,6 @@ Line *line_delete_char_at_cursor(Line *l)
     Line l_new = process_line(new_src, new_src_count);
     *l = l_new;
 
-    // TODO: Change the cur_word_idx if necessary (not sure)
     l->cursor = l->src + offset;
     l->cur_word_idx = word_idx_from_cursor(l); 
     return l;
@@ -318,8 +315,10 @@ Line *line_delete_word_at_cursor(Line *l)
         start = word->end;
         end = (!is_last_word) ? word_next->start - 1 : word->end;
     } else {
-        ERROR("Cursor is not at a word, most likely a whitespace");
-        return NULL;
+        // TODO: If at a whitespace move the cursor to nearest word
+        // could delete that whitespace (hahah)
+        line_delete_char_at_cursor(l);
+        return l;
     }
 
     size_t del_len = end - start + 1;
