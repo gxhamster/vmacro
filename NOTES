@@ -16,3 +16,5 @@ t -> till
 $ -> end of line
 F -> search backward
 T -> till backward
+
+- Also able to insert characters

@@ -315,8 +315,7 @@ Line *line_delete_word_at_cursor(Line *l)
         start = word->end;
         end = (!is_last_word) ? word_next->start - 1 : word->end;
     } else {
-        // TODO: If at a whitespace move the cursor to nearest word
-        // could delete that whitespace (hahah)
+        // Cursor is not at a word
         line_delete_char_at_cursor(l);
         return l;
     }
