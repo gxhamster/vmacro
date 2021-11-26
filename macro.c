@@ -123,13 +123,26 @@ Action process_actions(char *action_str, size_t len)
     return a;
 }
 
+// Check if ptr is pointing to inside the line
+bool is_at_line(Line *l, char *ptr)
+{
+    IS_LINE_NULL(l, false);
+    if (ptr >= l->src && ptr <= &l->src[l->len - 1]) {
+        return true;
+    }
+    return false;
+}
+
 // Searches the line for c from cursor to start
 // if char not found return cursor pos
 char *search_char_backward(Line *l, char c)
 {
     IS_LINE_NULL(l, NULL);
+    if (!is_at_line(l, l->cursor - 1)) {
+        return l->cursor;
+    }
     char *i;
-    for (i = l->cursor; i >= l->src; i--) {
+    for (i = l->cursor - 1; i >= l->src; i--) {
         if (*i == c) {
             return i;
         }
@@ -142,8 +155,12 @@ char *search_char_backward(Line *l, char c)
 char *search_char_forward(Line *l, char c)
 {
     IS_LINE_NULL(l, NULL);
+    if (!is_at_line(l, l->cursor + 1)) {
+        return l->cursor;
+    }
+
     char *i;
-    for (i = l->cursor; i < &l->src[l->len]; i++) {
+    for (i = l->cursor + 1; i < &l->src[l->len]; i++) {
         if (*i == c) {
             return i;
         }
@@ -473,6 +490,17 @@ Line *eval_action_on_line(Line *l, Action *a)
             set_cursor_at_start(l);      
         } else if (a->mov.command == LINE_END) {
             set_cursor_at_end(l);
+        } else if (a->mov.command == FIND) {
+            // TODO: Maybe move this to a function
+            size_t i;
+            char *cur_pos;
+            for (i = 0; i < a->mov.count; i++) {
+                if (a->mov.arg == 0)
+                    continue;
+                cur_pos = search_char_forward(l, a->mov.arg);
+                l->cursor = cur_pos;
+                l->cur_word_idx = word_idx_from_cursor(l);
+            }
         }
     } else if (a->command > 0) {
         // If there is an action

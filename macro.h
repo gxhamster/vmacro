@@ -64,6 +64,7 @@ Line *next_char(Line *l);
 Line *prev_char(Line *l);
 Line *set_cursor_at_start(Line *l);
 Line *set_cursor_at_end(Line *l);
+bool is_at_line(Line *l, char *ptr);
 size_t word_idx_from_cursor(Line *l);
 bool is_action(char c);
 bool is_movement(char c);
