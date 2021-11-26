@@ -123,6 +123,34 @@ Action process_actions(char *action_str, size_t len)
     return a;
 }
 
+// Searches the line for c from cursor to start
+// if char not found return cursor pos
+char *search_char_backward(Line *l, char c)
+{
+    IS_LINE_NULL(l, NULL);
+    char *i;
+    for (i = l->cursor; i >= l->src; i--) {
+        if (*i == c) {
+            return i;
+        }
+    }
+    return l->cursor;
+}
+
+// Searches the line for c from cursor
+// if char not found return cursor pos
+char *search_char_forward(Line *l, char c)
+{
+    IS_LINE_NULL(l, NULL);
+    char *i;
+    for (i = l->cursor; i < &l->src[l->len]; i++) {
+        if (*i == c) {
+            return i;
+        }
+    }
+    return l->cursor;
+}
+
 Line *set_cursor_at_start(Line *l)
 {
     IS_LINE_NULL(l, NULL);

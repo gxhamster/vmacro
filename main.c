@@ -133,7 +133,9 @@ int main(int argc, char **argv)
     
     char *str = "hello world again";
     Line l = process_line(str, strlen(str));
-    line_delete_range(&l, l.src+3, l.src+7);
+    set_cursor_at_end(&l);
+    char *c = search_char_forward(&l, 'w');
+     
 
     return 0;
 }
