@@ -13,6 +13,8 @@ static const KeyVal mapped_movements[] = {
     {'h', BACKWARD},
     {'w', WORD_FORWARD},
     {'b', WORD_BACKWARD},
+    {'^', LINE_START},
+    {'$', LINE_END},
     {'f', FIND},
     {'t', TILL},
 };
@@ -119,6 +121,24 @@ Action process_actions(char *action_str, size_t len)
     a.mov = m;
 
     return a;
+}
+
+Line *set_cursor_at_start(Line *l)
+{
+    IS_LINE_NULL(l, NULL);
+    l->cursor = l->src;
+    l->cur_word_idx = word_idx_from_cursor(l);
+
+    return l;
+}
+
+Line *set_cursor_at_end(Line *l)
+{
+    IS_LINE_NULL(l, NULL);
+    l->cursor = &l->src[l->len - 1];
+    l->cur_word_idx = word_idx_from_cursor(l);
+
+    return l;
 }
 
 Line *prev_char(Line *l)
@@ -283,6 +303,51 @@ Line *line_delete_char_at_cursor(Line *l)
     return l;
 }
 
+// Delete chars from start to end includes start and end
+Line *line_delete_range(Line *l, char *start, char *end)
+{
+    IS_LINE_NULL(l, NULL);
+    // Check if start and end points to between src
+    if (start < l->src && start > &l->src[l->len - 1]) {
+        ERROR("start does not lie in the line");
+        return NULL;
+    }
+    if (end < l->src && end > &l->src[l->len - 1]) {
+        ERROR("end does not lie in the line");
+        return NULL; 
+    }
+    if (start == end) {
+        ERROR("start and end points to same location");
+        return NULL;
+    }
+    
+    // which is near to start of line (for easier pointer calc)
+    char *near;
+    char *far;
+    near = (start - l->src < end - l->src) ? start : end;
+    far = (start - l->src > end - l->src) ? start : end;
+    
+    size_t del_len = far - near + 1;
+    char new_src[l->len - del_len];
+    size_t new_src_count = 0;
+    size_t i;
+    for (i = 0; i < l->len; i++) {
+        if (&l->src[i] < near || &l->src[i] > far) {
+            new_src[new_src_count] = l->src[i];
+            new_src_count++;
+        }
+    }
+    
+    size_t offset = near - l->src;
+    
+    new_src[new_src_count] = '\0';
+    Line line = process_line(new_src, new_src_count);
+    *l = line;
+    l->cursor = l->src + offset;
+    l->cur_word_idx = word_idx_from_cursor(l);
+
+    return l;
+}
 
 // Delete a word in a line 
 // This will also create a new src str the line points to
@@ -376,6 +441,10 @@ Line *eval_action_on_line(Line *l, Action *a)
             for (i = 0; i < a->mov.count; i++) {
                 prev_word_start(l);
             }
+        } else if (a->mov.command == LINE_START) {
+            set_cursor_at_start(l);      
+        } else if (a->mov.command == LINE_END) {
+            set_cursor_at_end(l);
         }
     } else if (a->command > 0) {
         // If there is an action

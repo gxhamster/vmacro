@@ -126,10 +126,14 @@ static Args handle_args(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-    Args args = handle_args(argc, argv);
-    FILE *fp = fopen(args.file_name, "r");
-    read_from_file(fp, &args);
-    free_args(&args);
+    //Args args = handle_args(argc, argv);
+    //FILE *fp = fopen(args.file_name, "r");
+    //read_from_file(fp, &args);
+    //free_args(&args);
+    
+    char *str = "hello world again";
+    Line l = process_line(str, strlen(str));
+    line_delete_range(&l, l.src+3, l.src+7);
 
     return 0;
 }
