@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <unistd.h>
 #include "macro.h"
+#include "actions.h"
 
 typedef struct {
     char **actions_str;

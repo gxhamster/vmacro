@@ -1,35 +1,17 @@
 #ifndef MACRO_H
 #define MACRO_H
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 
 #define ERROR(s) fprintf(stderr, "ERROR: %s\n", s)
 #define IS_LINE_NULL(l, return_code) if (l == NULL) { ERROR("Line is NULL"); return return_code;}
 
-// All actions and movements
-enum { DELETE = 1 };
-enum { FORWARD = 1, BACKWARD, WORD_FORWARD, WORD_BACKWARD, FIND, TILL, LINE_START, LINE_END }; 
-
 typedef struct {
     char key;
     int value;
 } KeyVal;
-
-
-typedef struct {
-    char identifier;
-    int command;
-    char arg;
-    size_t count;
-} Movement;
-
-typedef struct {
-    char identifier;
-    int command;
-    Movement mov; 
-} Action;
-
 
 // Word points to places on the actual src
 typedef struct { 
@@ -50,11 +32,9 @@ typedef struct {
 
 // Declarations
 Line process_line(char *buf_src, size_t size);
-Action process_actions(char *action_str, size_t len);
 Line *line_delete_word_at_cursor(Line *l);
 Line *line_delete_char_at_cursor(Line *l);
 Line *line_delete_range(Line *l, char *start, char *end);
-Line *eval_action_on_line(Line *l, Action *a);
 char *search_char_forward(Line *l, char c);
 char *search_char_backward(Line *l, char c);
 Line *next_word_end(Line *l);
@@ -66,10 +46,7 @@ Line *set_cursor_at_start(Line *l);
 Line *set_cursor_at_end(Line *l);
 bool is_at_line(Line *l, char *ptr);
 size_t word_idx_from_cursor(Line *l);
-bool is_action(char c);
-bool is_movement(char c);
-int movement_get_value_for_key(char key);
-int action_get_value_for_key(char key);
 void free_line(Line *l);
+
 
 #endif

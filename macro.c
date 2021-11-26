@@ -3,125 +3,15 @@
 #include <stdbool.h>
 #include <stdlib.h> 
 #include "macro.h"
+#include "actions.h"
 
-static const KeyVal mapped_actions[] = {
-    {'d', DELETE},
-};
-
-static const KeyVal mapped_movements[] = {
-    {'l', FORWARD},
-    {'h', BACKWARD},
-    {'w', WORD_FORWARD},
-    {'b', WORD_BACKWARD},
-    {'^', LINE_START},
-    {'$', LINE_END},
-    {'f', FIND},
-    {'t', TILL},
-};
-
+// Free all mmeory associated with a line 
 void free_line(Line *l)
 {
     memset(l->words, 0, MAX_WORDS_IN_LINE * sizeof(Word));
     free(l->src);
 }
 
-bool is_movement(char c)
-{
-    size_t keyval_len;
-    keyval_len = sizeof(mapped_movements) / sizeof(KeyVal);
-    
-    size_t i;
-    for (i = 0; i < keyval_len; i++) {
-        if (c == mapped_movements[i].key) 
-            return true;
-    }
-    return false;
-}
-
-bool is_action(char c)
-{
-    size_t keyval_len;
-    keyval_len = sizeof(mapped_actions) / sizeof(KeyVal);
-    
-    size_t i;
-    for (i = 0; i < keyval_len; i++) {
-        if (c == mapped_actions[i].key) 
-            return true;
-    }
-    return false;
-}
-
-int movement_get_value_for_key(char key)
-{
-    size_t keyval_len;
-    keyval_len = sizeof(mapped_movements) / sizeof(KeyVal);
-    
-    size_t i;
-    for (i = 0; i < keyval_len; i++) {
-        if (key == mapped_movements[i].key) 
-            return mapped_movements[i].value;
-    }
-    return 0;
-}
-
-int action_get_value_for_key(char key)
-{
-    size_t keyval_len;
-    keyval_len = sizeof(mapped_actions) / sizeof(KeyVal);
-    
-    size_t i;
-    for (i = 0; i < keyval_len; i++) {
-        if (key == mapped_actions[i].key) 
-            return mapped_actions[i].value;
-    }
-    return 0;
-}
-
-// Takes an string of action and identifies them which can be
-// executed on a line
-Action process_actions(char *action_str, size_t len)
-{
-    if (action_str == NULL) {
-        ERROR("Action string is NULL");
-        exit(-1);
-    }
-
-    Action a = {0};
-    Movement m = {0};
-    char num_buffer[10] = {0};
-    size_t num_buffer_count = 0;
-    bool found_action = false;
-    bool found_movement = false;
-    size_t i;
-    for (i = 0; i < len; i++) {
-        // If a number 
-        if (action_str[i] >= '0' && action_str[i] <= '9') {
-            num_buffer[num_buffer_count] = action_str[i];
-            num_buffer_count++;
-        }  
-        if (found_action == false) {
-            if (is_action(action_str[i])) {
-                a.identifier = action_str[i];
-                a.command = action_get_value_for_key(action_str[i]);
-                found_action = true;
-            }
-        }  
-        if (found_movement == false) {
-            if (is_movement(action_str[i])) {
-                m.identifier = action_str[i];
-                m.command = movement_get_value_for_key(action_str[i]);
-                found_movement = true;
-            }
-        } else if (found_movement) {
-            m.arg = action_str[i];
-        }
-    }
-    size_t count = (unsigned int)atoi(num_buffer);
-    m.count = (count > 0) ? count : 1;
-    a.mov = m;
-
-    return a;
-}
 
 // Check if ptr is pointing to inside the line
 bool is_at_line(Line *l, char *ptr)
@@ -464,6 +354,7 @@ Line *line_delete_word_at_cursor(Line *l)
 Line *eval_action_on_line(Line *l, Action *a)
 {
     // TODO: Fixed this if else block mess
+    // Maybe a switch statement. Or maybe a seperate functions
     // Only a movement
     if (a->identifier == 0) {
         if (a->mov.command == FORWARD) {
@@ -548,6 +439,7 @@ Line process_line(char *buf_src, size_t size)
         ERROR("Buffer is empty");
         exit(-1);
     }
+    // FIXME: Why did I put 2
     char *buf = malloc(size+2);
     strcpy(buf, buf_src);
 
