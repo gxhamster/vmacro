@@ -134,8 +134,7 @@ int main(int argc, char **argv)
     
     char *str = "hello world again";
     Line l = process_line(str, strlen(str));
-    set_cursor_at_end(&l);
-    Action a = process_actions("2fo", 3);
+    Action a = process_actions("2w", 3);
     eval_action_on_line(&l, &a);
 
     return 0;

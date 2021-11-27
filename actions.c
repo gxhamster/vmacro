@@ -20,6 +20,9 @@ const KeyVal mapped_movements[] = {
 // Movements
 void movement_forward(Line *l, Action *a)
 {
+    if (a->command == DELETE)
+        action_delete_forward(l, a);
+
     size_t i;
     for (i = 0; i < a->mov.count; i++) {
         next_char(l);
@@ -28,6 +31,9 @@ void movement_forward(Line *l, Action *a)
 
 void movement_backward(Line *l, Action *a)
 {
+    if (a->command == DELETE)
+        action_delete_backward(l, a);
+
     size_t i;
     for (i = 0; i < a->mov.count; i++) {
         prev_char(l);
@@ -36,6 +42,9 @@ void movement_backward(Line *l, Action *a)
 
 void movement_word_forward(Line *l, Action *a)
 {
+    if (a->command == DELETE)
+        action_delete_word_forward(l, a);
+
     size_t i;
     for (i = 0; i < a->mov.count; i++) {
         next_word_start(l);
@@ -44,6 +53,9 @@ void movement_word_forward(Line *l, Action *a)
 
 void movement_word_backward(Line *l, Action *a)
 {
+    if (a->command == DELETE)
+        action_delete_word_backward(l, a);
+
     size_t i;
     for (i = 0; i < a->mov.count; i++) {
         prev_word_start(l);
@@ -53,11 +65,13 @@ void movement_word_backward(Line *l, Action *a)
 
 void movement_line_start(Line *l, Action *a)
 {
+    (void) a;
     set_cursor_at_start(l);      
 }
 
 void movement_line_end(Line *l, Action *a)
 {
+    (void) a;
     set_cursor_at_end(l);
 
 }

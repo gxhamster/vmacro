@@ -2,10 +2,11 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h> 
+#include <assert.h>
 #include "macro.h"
 #include "actions.h"
 
-// Free all mmeory associated with a line 
+// Free all memory associated with a line 
 void free_line(Line *l)
 {
     memset(l->words, 0, MAX_WORDS_IN_LINE * sizeof(Word));
@@ -88,7 +89,6 @@ Line *prev_char(Line *l)
 
     char *new_cursor_pos = l->cursor - 1;
     if (new_cursor_pos < &l->src[0]) {
-        // ERROR("Cursor reached start of line");
         l->cursor = l->src;
         l->cur_word_idx = 0;
         return l;
@@ -117,7 +117,6 @@ Line *next_char(Line *l)
 
     char *next_cursor_pos = l->cursor + 1;
     if (next_cursor_pos > &l->src[l->len - 1]) {
-        // ERROR("cursor reached end of line");
         l->cursor = &l->src[l->len -1];
         l->cur_word_idx = l->n_words - 1;
         return l;
@@ -139,7 +138,6 @@ Line *prev_word_start(Line *l)
 {
     // Because size_t is an unsigned int so cast to (int)
     if ((int)l->cur_word_idx - 1 < 0) {
-        // ERROR("Reached start of words on line");
         l->cursor = l->src;
         l->cur_word_idx = 0;
         return l;
@@ -163,7 +161,6 @@ Line *next_word_end(Line *l)
         l->cursor = cur_word->end;
     } else {
         if (l->cur_word_idx + 1 > l->n_words - 1) {
-            // ERROR("Reached end of words on line");
             l->cursor = l->words[l->n_words - 1].end;
             l->cur_word_idx = l->n_words - 1;
             return l;
@@ -181,7 +178,6 @@ Line *next_word_end(Line *l)
 Line *next_word_start(Line *l)
 {
     if (l->cur_word_idx + 1 > l->n_words - 1) {
-        // ERROR("Reached end of words on line");
         l->cursor = l->words[l->n_words - 1].start;
         l->cur_word_idx = l->n_words - 1;
         return l;
@@ -353,83 +349,35 @@ Line *line_delete_word_at_cursor(Line *l)
 // Execute an action on a line
 Line *eval_action_on_line(Line *l, Action *a)
 {
-    // TODO: Fixed this if else block mess
-    // Maybe a switch statement. Or maybe a seperate functions
-    // Only a movement
-    if (a->identifier == 0) {
-        if (a->mov.command == FORWARD) {
-            size_t i;
-            for (i = 0; i < a->mov.count; i++) {
-                next_char(l);
-            }
-        } else if (a->mov.command == BACKWARD) {
-            size_t i;
-            for (i = 0; i < a->mov.count; i++) {
-                prev_char(l);
-            }
-        } else if (a->mov.command == WORD_FORWARD) {
-            size_t i;
-            for (i = 0; i < a->mov.count; i++) {
-                next_word_start(l);
-            }
-        } else if (a->mov.command == WORD_BACKWARD) {
-            size_t i;
-            for (i = 0; i < a->mov.count; i++) {
-                prev_word_start(l);
-            }
-        } else if (a->mov.command == LINE_START) {
-            set_cursor_at_start(l);      
-        } else if (a->mov.command == LINE_END) {
-            set_cursor_at_end(l);
-        } else if (a->mov.command == FIND) {
-            // TODO: Maybe move this to a function
-            size_t i;
-            char *cur_pos;
-            for (i = 0; i < a->mov.count; i++) {
-                if (a->mov.arg == 0)
-                    continue;
-                cur_pos = search_char_forward(l, a->mov.arg);
-                l->cursor = cur_pos;
-                l->cur_word_idx = word_idx_from_cursor(l);
-            }
-        }
-    } else if (a->command > 0) {
-        // If there is an action
-        if (a->command == DELETE) {
-            if (a->mov.command == WORD_FORWARD) {
-                size_t i;
-                for (i = 0; i < a->mov.count; i++) {
-                    line_delete_word_at_cursor(l);
-                }
-            } else if (a->mov.command == WORD_BACKWARD) {
-                size_t i;
-                for (i = 0; i < a->mov.count; i++) {
-                    line_delete_word_at_cursor(l);
-                    prev_word_start(l);
-                }
-            } else if (a->mov.command == FORWARD) {
-                size_t i;
-                for (i = 0; i < a->mov.count; i++) {
-                    line_delete_char_at_cursor(l);
-                }
-            } else if (a->mov.command == BACKWARD) {
-                size_t i;
-                char *initial_cursor_pos = l->cursor;
-                for (i = 0; i < a->mov.count; i++) {
-                    prev_char(l);
-                }
-                if (l->cursor < initial_cursor_pos) {
-                    for (i = 0; i < a->mov.count; i++) {
-                        line_delete_char_at_cursor(l);
-                    }
-                }
-            }
-
-        }
-
+    switch (a->mov.command) {
+        case FORWARD:
+            movement_forward(l, a);
+            break;
+        case BACKWARD:
+            movement_backward(l, a);
+            break;
+        case WORD_FORWARD:
+            movement_word_forward(l, a);
+            break;
+        case WORD_BACKWARD:
+            movement_word_backward(l, a);
+            break;
+        case LINE_START:
+            movement_line_start(l, a);
+            break;
+        case LINE_END:
+            movement_line_end(l, a);
+            break;
+        case FIND:
+            movement_find(l, a);
+            break;
+        default:
+            assert(0 && "Cannot identify the macro\n");
     }
+    
     return l;
 }
+
 
 // Turn a line to Line structure
 // Also seperate the words
