@@ -265,8 +265,10 @@ Line *line_delete_range(Line *l, char *start, char *end)
         return NULL; 
     }
     if (start == end) {
-        ERROR("start and end points to same location");
-        return NULL;
+        // Because start or end might not point to cursor
+        assert(start == l->cursor || end == l->cursor);
+        line_delete_char_at_cursor(l);
+        return l;
     }
     
     // which is near to start of line (for easier pointer calc)

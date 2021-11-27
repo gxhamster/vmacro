@@ -70,7 +70,10 @@ void movement_word_backward(Line *l, Action *a)
 
 void movement_line_start(Line *l, Action *a)
 {
-    (void) a;
+    if (a->command == DELETE) {
+        action_delete_to_line_start(l, a);
+        return;
+    }
     set_cursor_at_start(l);      
 }
 
@@ -145,6 +148,14 @@ void action_delete_to_line_end(Line *l, Action *a)
 {
     (void) a;
     line_delete_range(l, l->cursor, line_get_end_ptr(l));
+    prev_char(l);
+}
+
+void action_delete_to_line_start(Line *l, Action *a)
+{
+    (void) a;
+    prev_char(l);
+    line_delete_range(l, l->cursor, l->src);
 }
 
 // Helper functions
