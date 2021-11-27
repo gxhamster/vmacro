@@ -2,6 +2,7 @@
 
 // This file defines what each vim action and movement does. 
 
+// Please add any new movement or action here too
 const KeyVal mapped_actions[] = {
     {'d', DELETE}
 };
@@ -75,7 +76,10 @@ void movement_line_start(Line *l, Action *a)
 
 void movement_line_end(Line *l, Action *a)
 {
-    (void) a;
+    if (a->command == DELETE) {
+        action_delete_to_line_end(l, a);
+        return;
+    }
     set_cursor_at_end(l);
 
 }
@@ -135,6 +139,12 @@ void action_delete_backward(Line *l, Action *a)
             line_delete_char_at_cursor(l);
         }
     }
+}
+
+void action_delete_to_line_end(Line *l, Action *a)
+{
+    (void) a;
+    line_delete_range(l, l->cursor, line_get_end_ptr(l));
 }
 
 // Helper functions

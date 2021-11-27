@@ -24,6 +24,12 @@ bool is_at_line(Line *l, char *ptr)
     return false;
 }
 
+char *line_get_end_ptr(Line *l)
+{
+    IS_LINE_NULL(l, NULL);
+    return &l->src[l->len - 1];
+}
+
 // Searches the line for c from cursor to start
 // if char not found return cursor pos
 char *search_char_backward(Line *l, char c)
