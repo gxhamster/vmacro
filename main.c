@@ -35,7 +35,7 @@ static char *read_from_file(FILE *fp, Args *args)
             Action a = process_actions(args->actions_str[i], strlen(args->actions_str[i]));
             eval_action_on_line(&l, &a);
         }
-        printf("|%s|\n", l.cursor);
+        pretty_print_line(&l);
         free_line(&l);
     }
     fclose(fp);

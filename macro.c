@@ -9,10 +9,21 @@
 // Free all memory associated with a line 
 void free_line(Line *l)
 {
+    assert(l != NULL);
     memset(l->words, 0, MAX_WORDS_IN_LINE * sizeof(Word));
     free(l->src);
 }
 
+void pretty_print_line(Line *l)
+{
+    printf("|%s|\n", l->src);
+    printf(" ");
+    char *i;
+    for (i = l->src; i != l->cursor; i++) {
+        printf(" ");    
+    }
+    printf("^\n");
+}
 
 // Check if ptr is pointing to inside the line
 bool is_at_line(Line *l, char *ptr)
@@ -393,11 +404,12 @@ Line process_line(char *buf_src, size_t size)
         ERROR("Buffer is empty");
         exit(-1);
     }
-    // FIXME: Why did I put 2
-    char *buf = malloc(size+2);
+
+    char *buf = malloc(size+1);
     strcpy(buf, buf_src);
 
     Line line;
+    memset(line.words, 0, sizeof(Word) * MAX_WORDS_IN_LINE);
     line.len = size;
     line.cursor = buf;
     line.cur_word_idx = 0;
