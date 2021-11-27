@@ -24,5 +24,6 @@ and all (compiler optimizations turned on).
 $ make debug
 $ ./macro -f test.txt -m "3fp;l;d$" -d";"
 $ |I am so happy this p|
+                      ^
 ```
 
