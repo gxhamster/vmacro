@@ -1,7 +1,7 @@
 CC=gcc
 OUT=macro
 CFLAGS=-Wall -Wextra -O3
-CFLAGS_G=-Wall -Wextra -ggdb
+CFLAGS_G=-Wall -Wextra -ggdb -p
 
 all: main.c macro.c actions.c
 	$(CC) $(CFLAGS) -o $(OUT) actions.c macro.c main.c

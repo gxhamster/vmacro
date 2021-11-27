@@ -231,7 +231,7 @@ Line *line_delete_char_at_cursor(Line *l)
 {
     IS_LINE_NULL(l, NULL);
 
-    char new_src[l->len];
+    char new_src[l->len + 1];
     size_t new_src_count = 0;
     char *delete_char = l->cursor;
     size_t i;
@@ -279,7 +279,7 @@ Line *line_delete_range(Line *l, char *start, char *end)
     far = (start - l->src > end - l->src) ? start : end;
     
     size_t del_len = far - near + 1;
-    char new_src[l->len - del_len];
+    char new_src[l->len - del_len + 1];
     size_t new_src_count = 0;
     size_t i;
     for (i = 0; i < l->len; i++) {
@@ -338,7 +338,7 @@ Line *line_delete_word_at_cursor(Line *l)
     }
 
     size_t del_len = end - start + 1;
-    char new_src[l->len - del_len];
+    char new_src[l->len - del_len + 1];
     size_t new_src_count = 0;
 
     if (!is_last_word) {
@@ -411,7 +411,7 @@ Line process_line(char *buf_src, size_t size)
     }
 
     char *buf = malloc(size+1);
-    strcpy(buf, buf_src);
+    memcpy(buf, buf_src, size + 1);
 
     Line line;
     memset(line.words, 0, sizeof(Word) * MAX_WORDS_IN_LINE);
@@ -426,7 +426,6 @@ Line process_line(char *buf_src, size_t size)
     const char *delim = "-.\t ";
     token = strtok(buf, delim);
     while (token != NULL) {
-        // printf("%p %s\n", token, token);
         token_size = strlen(token);
         Word word;
         word.start = token;
@@ -437,7 +436,7 @@ Line process_line(char *buf_src, size_t size)
         token = strtok(NULL, delim);
     }
     // Change the src to buf
-    strcpy(buf, buf_src);
+    memcpy(buf, buf_src, size + 1);
     line.src = buf;
 
     return line;
