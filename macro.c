@@ -243,6 +243,7 @@ Line *line_delete_char_at_cursor(Line *l)
     }
     new_src[new_src_count] = '\0';
     size_t offset = l->cursor - l->src;
+    free_line(l);
     Line l_new = process_line(new_src, new_src_count);
     *l = l_new;
 
@@ -291,6 +292,7 @@ Line *line_delete_range(Line *l, char *start, char *end)
     size_t offset = near - l->src;
     
     new_src[new_src_count] = '\0';
+    free_line(l);
     Line line = process_line(new_src, new_src_count);
     *l = line;
     l->cursor = l->src + offset;
@@ -357,6 +359,7 @@ Line *line_delete_word_at_cursor(Line *l)
     size_t offset = cursor_pos - src;
 
     // Reproduce the line structure becaus src is changed
+    free_line(l);
     Line l_new = process_line(new_src, new_src_count);
     *l = l_new;
 

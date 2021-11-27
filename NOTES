@@ -6,10 +6,10 @@ and execute that macro on each line on a file
 -- Things to do --
 
 - Identify words (DONE)
-- Commands: d
+- Commands: d (DONE)
 
 TODO: Add extra vim commands
-f -> find
+f -> find (DONE)
 t -> till
 0 -> start of line
 ^ -> start of first word
@@ -19,4 +19,4 @@ T -> till backward
 
 - Also able to insert characters
 
-TODO: Seperate things
+TODO: Seperate things (Done)
