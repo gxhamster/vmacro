@@ -31,7 +31,7 @@ void movement_line_start(Line *l, Action *a);
 void movement_line_end(Line *l, Action *a);
 void movement_find(Line *l, Action *a);
 
-void action_delete_word_forward(Line *l, Action *a) ;
+void action_delete_word_forward(Line *l, Action *a);
 void action_delete_word_backward(Line *l, Action *a);
 void action_delete_forward(Line *l, Action *a);
 void action_delete_backward(Line *l, Action *a);
