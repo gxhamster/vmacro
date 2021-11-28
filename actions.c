@@ -89,6 +89,10 @@ void movement_line_end(Line *l, Action *a)
 
 void movement_find(Line *l, Action *a)
 {
+    if (a->command == DELETE) {
+        action_delete_to_find(l, a);
+        return;
+    }
     size_t i;
     char *cur_pos;
     for (i = 0; i < a->mov.count; i++) {
@@ -159,6 +163,19 @@ void action_delete_to_line_start(Line *l, Action *a)
     (void) a;
     prev_char(l);
     line_delete_range(l, l->cursor, l->src);
+}
+
+void action_delete_to_find(Line *l, Action *a)
+{
+    char *start, *end;
+    size_t i;
+    for (i = 0; i < a->mov.count; i++) {
+        if (a->mov.arg == 0)
+            continue;
+        start = l->cursor;
+        end = search_char_forward(l, a->mov.arg);
+        line_delete_range(l, start, end);
+    }
 }
 
 // Helper functions

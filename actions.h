@@ -37,6 +37,7 @@ void action_delete_forward(Line *l, Action *a);
 void action_delete_backward(Line *l, Action *a);
 void action_delete_to_line_end(Line *l, Action *a);
 void action_delete_to_line_start(Line *l, Action *a);
+void action_delete_to_find(Line *l, Action *a);
 
 bool is_action(char c);
 bool is_movement(char c);
