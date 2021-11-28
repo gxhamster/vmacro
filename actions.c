@@ -104,6 +104,7 @@ void movement_find(Line *l, Action *a)
 // Delete action and different variations
 void action_delete_word_forward(Line *l, Action *a) 
 {
+    (void) a;
     size_t i;
     for (i = 0; i < a->mov.count; i++) {
         line_delete_word_at_cursor(l);
@@ -113,16 +114,17 @@ void action_delete_word_forward(Line *l, Action *a)
 
 void action_delete_word_backward(Line *l, Action *a)
 {
+    (void) a;
     size_t i;
     for (i = 0; i < a->mov.count; i++) {
-        line_delete_word_at_cursor(l);
-        prev_word_start(l);
+        line_delete_word_at_cursor_backward(l);
     }
 
 }
 
 void action_delete_forward(Line *l, Action *a)
 {
+    (void) a;
     size_t i;
     for (i = 0; i < a->mov.count; i++) {
         line_delete_char_at_cursor(l);
@@ -132,6 +134,7 @@ void action_delete_forward(Line *l, Action *a)
 
 void action_delete_backward(Line *l, Action *a)
 {
+    (void) a;
     size_t i;
     char *initial_cursor_pos = l->cursor;
     for (i = 0; i < a->mov.count; i++) {

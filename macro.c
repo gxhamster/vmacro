@@ -301,6 +301,68 @@ Line *line_delete_range(Line *l, char *start, char *end)
     return l;
 }
 
+Line *line_delete_word_at_cursor_backward(Line *l)
+{
+    IS_LINE_NULL(l, NULL);
+
+    if (!is_at_line(l, l->cursor)) {
+        ERROR("Cursor is not on the line");
+        return NULL;
+    }
+
+    int word_idx = l->cur_word_idx;
+    if ((size_t)word_idx > l->n_words - 1) {
+        ERROR("Word index out of range");
+        return NULL;
+    }
+
+    Word *word, *word_prev;
+    word = &l->words[word_idx];
+    word_prev = (word_idx - 1 < 0) ? NULL : &l->words[word_idx - 1];
+    bool is_first_word = (!word_prev) ? true : false; 
+    
+    char *start, *end;
+    if (l->cursor <= word->end && l->cursor > word->start) {
+        start = l->cursor;
+        end = word->start;
+    } else if (l->cursor == word->start) {
+        start = l->cursor;
+        end = (!is_first_word) ? word_prev->start : l->src;
+    } else {
+        // Cursor is probbaly not at a word
+        // In vim i have found that backward and forward deleting acts
+        // differently. In backward deleting if at a whitespace it deletes the prev 
+        // word
+        start = l->cursor;
+        end = (!is_first_word) ? word_prev->start : l->src;
+    }
+
+    size_t del_len = end - start + 1;
+    char new_src[l->len - del_len + 1];
+    size_t new_src_count = 0;
+
+    size_t i;
+    for (i = 0; i < l->len; i++) {
+        if (&l->src[i] < end || &l->src[i] > start) {
+            new_src[new_src_count] = l->src[i];
+            new_src_count++;
+        }
+    }
+    new_src[new_src_count] = '\0';
+    // Offset to move cursor to point word was deleted
+    char *src = l->src;
+    size_t offset = end - src;
+
+    // Reproduce the line structure becaus src is changed
+    free_line(l);
+    Line l_new = process_line(new_src, new_src_count);
+    *l = l_new;
+
+    l->cursor = l->src + offset;
+    l->cur_word_idx = word_idx_from_cursor(l); 
+    return l;
+}
+
 // Delete a word in a line 
 // This will also create a new src str the line points to
 Line *line_delete_word_at_cursor(Line *l)
