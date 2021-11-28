@@ -9,6 +9,7 @@ typedef struct {
     char **actions_str;
     char *file_name;
     size_t num_of_actions;
+    bool pretty_print;
 } Args;
 
 
@@ -35,7 +36,10 @@ static char *read_from_file(FILE *fp, Args *args)
             Action a = process_actions(args->actions_str[i], strlen(args->actions_str[i]));
             eval_action_on_line(&l, &a);
         }
-        pretty_print_line(&l);
+        if (args->pretty_print) 
+            pretty_print_line(&l);
+        else
+            printf("%s\n", l.src);
         free_line(&l);
     }
     fclose(fp);
@@ -60,9 +64,10 @@ static Args handle_args(int argc, char **argv)
     const char *delim = NULL;
     char *macro_str = NULL;
     char *file_name = NULL;
+    bool pretty_print = false;
     char c;
     // FIXME: values from optarg might get overwritten
-    while ((c = getopt(argc, argv, ":d:m:f:")) != -1) {
+    while ((c = getopt(argc, argv, ":d:m:f:p")) != -1) {
         switch (c) {
             case 'd':
                 delim = optarg;
@@ -75,6 +80,9 @@ static Args handle_args(int argc, char **argv)
             case 'f':
                 file_name = optarg;
                 // printf("File: %s\n", file_name);
+                break;
+            case 'p':
+                pretty_print = true;
                 break;
             case ':':
                 printf("ERROR: Option needs value\n");
@@ -120,7 +128,7 @@ static Args handle_args(int argc, char **argv)
         token = strtok(NULL, delim);
     }
     
-    Args args = {actions_str, file_name, actions_str_count};
+    Args args = {actions_str, file_name, actions_str_count, pretty_print};
     return args;
 
 }
