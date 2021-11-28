@@ -1,3 +1,6 @@
 macro
 test.txt
 tags
+analysis*
+gmon.out
+test*.txt

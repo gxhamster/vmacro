@@ -227,6 +227,30 @@ size_t word_idx_from_cursor(Line *l)
     return 0;
 }
 
+
+// Optimized
+Line *line_delete_char_at_cursor_optimized(Line *l)
+{
+    IS_LINE_NULL(l, NULL);
+    char *delete_char = l->cursor;
+    char *last_char = line_get_end_ptr(l);
+    size_t offset = l->cursor - l->src;
+    size_t new_size; 
+
+    memmove(l->cursor, delete_char+1, last_char + 1 - delete_char);
+    
+    new_size = ((int)l->len - 1 < 0) ? 0 : l->len -1;
+
+    Line l_new = process_line(l->src, new_size);
+    free_line(l);
+
+    *l = l_new;
+    l->cursor = l->src + offset;
+    l->cur_word_idx = word_idx_from_cursor(l);
+
+    return l;
+}
+
 Line *line_delete_char_at_cursor(Line *l)
 {
     IS_LINE_NULL(l, NULL);
@@ -257,11 +281,11 @@ Line *line_delete_range(Line *l, char *start, char *end)
 {
     IS_LINE_NULL(l, NULL);
     // Check if start and end points to between src
-    if (start < l->src && start > &l->src[l->len - 1]) {
+    if (start < l->src || start > &l->src[l->len - 1]) {
         ERROR("start does not lie in the line");
         return NULL;
     }
-    if (end < l->src && end > &l->src[l->len - 1]) {
+    if (end < l->src || end > &l->src[l->len - 1]) {
         ERROR("end does not lie in the line");
         return NULL; 
     }
