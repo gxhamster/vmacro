@@ -456,7 +456,7 @@ Line *eval_action_on_line(Line *l, Action *a)
             movement_find(l, a);
             break;
         default:
-            assert(0 && "Cannot identify the macro\n");
+            assert(0 && "Cannot identify the movement\n");
     }
     
     return l;
