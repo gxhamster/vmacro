@@ -34,8 +34,6 @@ typedef struct {
 Line process_line(char *buf_src, size_t size);
 Line *line_delete_word_at_cursor(Line *l);
 Line *line_delete_word_at_cursor_backward(Line *l);
-Line *line_delete_multiple_word_at_cursor(Line *l, size_t count);
-Line *line_delete_multiple_word_at_cursor_backward(Line *l, size_t count);
 Line *line_delete_char_at_cursor(Line *l);
 Line *line_delete_char_at_cursor_optimized(Line *l);
 Line *line_delete_range(Line *l, char *start, char *end);
