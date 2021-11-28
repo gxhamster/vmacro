@@ -454,6 +454,75 @@ Line *line_delete_word_at_cursor(Line *l)
     return l;
 }
 
+Line *line_delete_multiple_word_at_cursor_backward(Line *l, size_t count)
+{
+    IS_LINE_NULL(l, NULL);
+    if (count < 2) {
+        line_delete_word_at_cursor_backward(l);
+    }
+    
+    size_t word_idx = l->cur_word_idx;
+    if (word_idx > l->n_words-1) {
+        ERROR("Word index out of range");
+        return NULL;
+    }
+    
+    Word *word_last;
+    Word *word_after_last;
+
+    int last_word_idx = l->cur_word_idx - (count -1);
+
+    bool word_last_avail = (last_word_idx >= 0) ? true : false;
+    bool delete_after_last_word = (last_word_idx - 1 >= 0) ? true : false;
+
+    word_last = (word_last_avail) ? &l->words[last_word_idx] : &l->words[0];
+    word_after_last = (delete_after_last_word) ? &l->words[last_word_idx - 1] : NULL; 
+
+    char *start;
+    char *end;
+    end = l->cursor;
+    start = (delete_after_last_word) ? word_after_last->end+1 : word_last->end +1;
+
+    l = line_delete_range(l, start, end);
+    return l; 
+
+}
+
+// If needed to delete multiple words (forward)
+// count is how many words to delete
+Line *line_delete_multiple_word_at_cursor(Line *l, size_t count)
+{
+    IS_LINE_NULL(l, NULL);
+    if (count < 2) {
+        line_delete_word_at_cursor(l);
+    }
+    
+    size_t word_idx = l->cur_word_idx;
+    if (word_idx > l->n_words-1) {
+        ERROR("Word index out of range");
+        return NULL;
+    }
+    
+    Word *word_last;
+    Word *word_after_last;
+
+    size_t last_word_idx = l->cur_word_idx + count - 1;
+
+    bool word_last_avail = (last_word_idx < l->n_words - 1) ? true : false;
+    bool delete_after_last_word = (last_word_idx + 1 < l->n_words - 1) ? true : false;
+
+    word_last = (word_last_avail) ? &l->words[last_word_idx] : &l->words[l->n_words - 1];
+    word_after_last = (delete_after_last_word) ? &l->words[last_word_idx + 1] : NULL; 
+
+    char *start;
+    char *end;
+    start = l->cursor;
+    end = (delete_after_last_word) ? word_after_last->start - 1 : word_last->end;
+
+    l = line_delete_range(l, start, end);
+    return l; 
+}
+
 // Execute an action on a line
 Line *eval_action_on_line(Line *l, Action *a)
 {
@@ -506,7 +575,7 @@ Line process_line(char *buf_src, size_t size)
     line.cur_word_idx = 0;
     line.n_words = 0;
 
-    // TODO: implement way to find words without using strtok
+    // TODO: implement way to find words without using strtok 
     char *token;
     size_t token_size;
     const char *delim = "-.\t ";

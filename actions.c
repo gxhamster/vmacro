@@ -105,26 +105,30 @@ void movement_find(Line *l, Action *a)
 
 }
 
+#define SINGLE_WORD_DEL_LIMIT 1
 // Delete action and different variations
 void action_delete_word_forward(Line *l, Action *a) 
 {
-    size_t i;
-    for (i = 0; i < a->mov.count; i++) {
-        line_delete_word_at_cursor(l);
+    if (a->mov.count > SINGLE_WORD_DEL_LIMIT) {
+        line_delete_multiple_word_at_cursor(l, a->mov.count);
+        return;
     }
+    
+    line_delete_word_at_cursor(l);
 
 }
 
 void action_delete_word_backward(Line *l, Action *a)
 {
-    size_t i;
-    for (i = 0; i < a->mov.count; i++) {
-        line_delete_word_at_cursor_backward(l);
+    if (a->mov.count > SINGLE_WORD_DEL_LIMIT) {
+        line_delete_multiple_word_at_cursor_backward(l, a->mov.count);
+        return;
     }
+    line_delete_word_at_cursor_backward(l);
 
 }
 
-#define SINGLE_CHAR_DEL_LIMIT 2
+#define SINGLE_CHAR_DEL_LIMIT 1
 void action_delete_forward(Line *l, Action *a)
 {
     // For optimization reasons
