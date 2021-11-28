@@ -124,7 +124,7 @@ void action_delete_word_backward(Line *l, Action *a)
 
 }
 
-#define SINGLE_CHAR_DEL_LIMIT 5
+#define SINGLE_CHAR_DEL_LIMIT 2
 void action_delete_forward(Line *l, Action *a)
 {
     // For optimization reasons
