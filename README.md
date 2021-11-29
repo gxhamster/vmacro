@@ -1,9 +1,10 @@
 # Vmacro
 
-## What this is program
+## What is this program
 
 Vmacro is a simple utility to execute vim style macros on each line of a file.
-Although all I was not able to include all commands of vim yet. 
+Although all I was not able to include all commands of vim yet. I dont think I 
+will implement inserting characters.
 
 ### Remember!
 The behaviour of the commands might not be exactly like in vim.
