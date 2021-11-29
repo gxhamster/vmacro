@@ -541,48 +541,6 @@ Line *eval_action_on_line(Line *l, Action *a)
     return l;
 }
 
-
-// Turn a line to Line structure
-// Also seperate the words
-Line process_line1(char *buf_src, size_t size)
-{
-    if (buf_src == NULL) {
-        ERROR("Buffer is empty");
-        exit(-1);
-    }
-
-    char *buf = malloc(size+1);
-    memcpy(buf, buf_src, size + 1);
-
-    Line line;
-    memset(line.words, 0, sizeof(Word) * MAX_WORDS_IN_LINE);
-    line.len = size;
-    line.cursor = buf;
-    line.cur_word_idx = 0;
-    line.n_words = 0;
-
-    // TODO: implement way to find words without using strtok 
-    char *token;
-    size_t token_size;
-    const char *delim = "\t ";
-    token = strtok(buf, delim);
-    while (token != NULL) {
-        token_size = strlen(token);
-        Word word;
-        word.start = token;
-        word.end = token + token_size - 1;
-        word.len = token_size;
-        line.words[line.n_words] = word;
-        line.n_words++;
-        token = strtok(NULL, delim);
-    }
-    // Change the src to buf
-    memcpy(buf, buf_src, size + 1);
-    line.src = buf;
-
-    return line;
-}
-
 const char delim[] = { ' ', '\t', '-', '.', '/' };
 const size_t delim_size = sizeof(delim) / sizeof(char);
 
