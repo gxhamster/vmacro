@@ -54,5 +54,6 @@ bool is_at_line(Line *l, char *ptr);
 size_t word_idx_from_cursor(Line *l);
 void free_line(Line *l);
 void pretty_print_line(Line *l);
+bool is_delim(char c);
 
 #endif

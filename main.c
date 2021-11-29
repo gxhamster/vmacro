@@ -141,7 +141,7 @@ int main(int argc, char **argv)
     read_from_file(fp, &args);
     free_args(&args);
     
-    //char *str = "hello world again";
+    //char *str = "hello-world--again";
     //Line l = process_line(str, strlen(str));
     //Action a = process_actions("2w", 3);
     //eval_action_on_line(&l, &a);

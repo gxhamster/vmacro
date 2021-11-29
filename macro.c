@@ -6,6 +6,8 @@
 #include "macro.h"
 #include "actions.h"
 
+// This files contains the implemantion for all the line functions
+
 // Free all memory associated with a line 
 void free_line(Line *l)
 {
@@ -541,7 +543,7 @@ Line *eval_action_on_line(Line *l, Action *a)
 
 // Turn a line to Line structure
 // Also seperate the words
-Line process_line(char *buf_src, size_t size)
+Line process_line1(char *buf_src, size_t size)
 {
     if (buf_src == NULL) {
         ERROR("Buffer is empty");
@@ -578,4 +580,85 @@ Line process_line(char *buf_src, size_t size)
     line.src = buf;
 
     return line;
+}
+
+const char delim[] = { ' ', '\t', '-', '.' };
+bool is_delim(char c) 
+{
+    size_t i;
+    for (i = 0; i < 4; i++)
+        if (c == delim[i])
+            return true;
+    return false;
+}
+
+bool is_delim_whitespace(char c)
+{
+    return (c == ' ' || c== '\t') ? true : false; 
+}
+
+enum { WORD_START, IN_WORD, IN_DELIM };
+Line process_line(char *buf_src, size_t size)
+{
+    if (buf_src == NULL) {
+        ERROR("Buffer is empty");
+        exit(-1);
+    }
+    
+    char *buf = malloc(size+1);
+    memcpy(buf, buf_src, size + 1);
+
+    Line line;
+    memset(line.words, 0, sizeof(Word) * MAX_WORDS_IN_LINE);
+    line.len = size;
+    line.cursor = buf;
+    line.cur_word_idx = 0;
+    line.n_words = 0;
+    line.src = buf;
+    
+    Line *l = &line;
+    Word *w;
+    int state = (is_delim(buf[0])) ? IN_DELIM : WORD_START;
+    size_t i;
+    for (i = 0; i < size+1; i++) {
+        w = &l->words[l->n_words];
+        //printf("%c\n", buf[i]);
+        switch (state) {
+            case WORD_START:
+                w->start = &buf[i];
+                state = IN_WORD;
+                break;
+            case IN_WORD:
+                if (is_delim(buf[i])) {
+                    state = IN_DELIM;
+                    w->end = &buf[i - 1];
+                    w->len = w->end - w->start + 1;
+                    l->n_words++;
+                    i--;
+                } else if (buf[i] == '\0') {
+                    w->end = &buf[i - 1];
+                    w->len = w->end - w->start + 1;
+                }
+                break;
+            case IN_DELIM:
+                if (!is_delim(buf[i])) {
+                    state = WORD_START;
+                    i--;
+                } else if (buf[i] == '\0') {
+                    continue;
+                } else if (!is_delim_whitespace(buf[i])) {
+                    w->start = &buf[i];
+                    w->end = &buf[i];
+                    w->len = 1;
+                    l->n_words++;
+                }
+                break;
+            default:
+                continue;
+
+        }
+    }
+    
+    return line;
+
 }
