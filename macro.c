@@ -412,17 +412,18 @@ Line *eval_action_on_line(Line *l, Action *a)
     return l;
 }
 
-const char delim[] = { ' ', '\t', '-', '.', '/' };
-const size_t delim_size = sizeof(delim) / sizeof(char);
-
-bool is_delim(char c) 
+bool is_delim(char c)
 {
-
-    size_t i;
-    for (i = 0; i < delim_size; i++)
-        if (c == delim[i])
+    switch (c) {
+        case ' ':
+        case '-':
+        case '.':
+        case '/':
+        case '\t':
             return true;
-    return false;
+        default:
+            return false;
+    }
 }
 
 bool is_delim_whitespace(char c)
@@ -455,12 +456,7 @@ Line process_line(char *buf_src, size_t size)
     size_t i;
     for (i = 0; i < size+1; i++) {
         w = &l->words[l->n_words];
-        //printf("%c\n", buf[i]);
         switch (state) {
-            case WORD_START:
-                w->start = &buf[i];
-                state = IN_WORD;
-                break;
             case IN_WORD:
                 if (is_delim(buf[i])) {
                     state = IN_DELIM;
@@ -486,6 +482,10 @@ Line process_line(char *buf_src, size_t size)
                     w->len = 1;
                     l->n_words++;
                 }
+                break;
+            case WORD_START:
+                w->start = &buf[i];
+                state = IN_WORD;
                 break;
             default:
                 continue;
