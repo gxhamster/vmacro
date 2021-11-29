@@ -334,7 +334,8 @@ Line *line_delete_range(Line *l, char *start, char *end)
     }
     if (start == end) {
         // Because start or end might not point to cursor
-        assert(start == l->cursor || end == l->cursor);
+        // Somehow cursor moved forward in this scenario
+        l->cursor = start;
         line_delete_char_at_cursor(l);
         return l;
     }
@@ -582,11 +583,14 @@ Line process_line1(char *buf_src, size_t size)
     return line;
 }
 
-const char delim[] = { ' ', '\t', '-', '.' };
+const char delim[] = { ' ', '\t', '-', '.', '/' };
+const size_t delim_size = sizeof(delim) / sizeof(char);
+
 bool is_delim(char c) 
 {
+
     size_t i;
-    for (i = 0; i < 4; i++)
+    for (i = 0; i < delim_size; i++)
         if (c == delim[i])
             return true;
     return false;
@@ -638,6 +642,7 @@ Line process_line(char *buf_src, size_t size)
                 } else if (buf[i] == '\0') {
                     w->end = &buf[i - 1];
                     w->len = w->end - w->start + 1;
+                    l->n_words++;
                 }
                 break;
             case IN_DELIM:
