@@ -122,7 +122,7 @@ Line *set_cursor_at_start(Line *l)
 Line *set_cursor_at_end(Line *l)
 {
     IS_LINE_NULL(l, NULL);
-    l->cursor = &l->src[l->len - 1];
+    l->cursor = line_get_end_ptr(l);
     l->cur_word_idx = word_idx_from_cursor(l);
 
     return l;
@@ -167,8 +167,9 @@ Line *next_char(Line *l)
     bool is_word_next = (word_next == NULL) ? false : true;
 
     char *next_cursor_pos = l->cursor + 1;
-    if (next_cursor_pos > &l->src[l->len - 1]) {
-        l->cursor = &l->src[l->len -1];
+    char *line_end = line_get_end_ptr(l);
+    if (next_cursor_pos > line_end) {
+        l->cursor = line_end;
         l->cur_word_idx = l->n_words - 1;
         return l;
     }
@@ -324,17 +325,17 @@ Line *line_delete_range(Line *l, char *start, char *end)
 {
     IS_LINE_NULL(l, NULL);
     // Check if start and end points to between src
-    if (start < l->src || start > &l->src[l->len - 1]) {
+    if (start < l->src || start > line_get_end_ptr(l)) {
         ERROR("start does not lie in the line");
         return NULL;
     }
-    if (end < l->src || end > &l->src[l->len - 1]) {
+    if (end < l->src || end > line_get_end_ptr(l)) {
         ERROR("end does not lie in the line");
         return NULL; 
     }
     if (start == end) {
-        // Because start or end might not point to cursor
-        // Somehow cursor moved forward in this scenario
+        // Somehow cursor moved forward in this scenario so cursor is set to start
+        // This occured when trying to delete a word of len 1
         l->cursor = start;
         line_delete_char_at_cursor(l);
         return l;
