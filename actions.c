@@ -157,7 +157,6 @@ void movement_till_backward(Line *l, Action *a)
         l->cursor = cur_pos;
         l->cur_word_idx = word_idx_from_cursor(l);
     }
-
 }
 
 // Delete action and different variations
@@ -230,6 +229,7 @@ void action_delete_to_find(Line *l, Action *a)
     char *start, *end;
     size_t i;
     start = l->cursor;
+    end = l->cursor;
     for (i = 0; i < a->mov.count; i++) {
         if (a->mov.arg == 0)
             continue;
@@ -237,6 +237,8 @@ void action_delete_to_find(Line *l, Action *a)
         l->cursor = end;
         l->cur_word_idx = word_idx_from_cursor(l);
     }
+    if (start == end)
+        return;
     line_delete_range(l, start, end);
 }
 
@@ -245,6 +247,7 @@ void action_delete_to_find_backward(Line *l, Action *a)
     char *start, *end;
     size_t i;
     end = l->cursor;
+    start = l->cursor;
     for (i = 0; i < a->mov.count; i++) {
         if (a->mov.arg == 0)
             continue;
@@ -252,6 +255,8 @@ void action_delete_to_find_backward(Line *l, Action *a)
         l->cursor = start;
         l->cur_word_idx = word_idx_from_cursor(l);
     }
+    if (start == end)
+        return;
     line_delete_range(l, start, end);
 }
 
@@ -260,6 +265,7 @@ void action_delete_till(Line *l, Action *a)
     char *start, *end;
     size_t i;
     start = l->cursor;
+    end = l->cursor;
     for (i = 0; i < a->mov.count; i++) {
         if (a->mov.arg == 0)
             continue;
@@ -267,6 +273,8 @@ void action_delete_till(Line *l, Action *a)
         l->cursor = end;
         l->cur_word_idx = word_idx_from_cursor(l);
     }
+    if (start == end)
+        return;
     line_delete_range(l, start, end);
 }
 
@@ -275,6 +283,7 @@ void action_delete_till_backward(Line *l, Action *a)
     char *start, *end;
     size_t i;
     end = l->cursor;
+    start = l->cursor;
     for (i = 0; i < a->mov.count; i++) {
         if (a->mov.arg == 0)
             continue;
@@ -282,6 +291,8 @@ void action_delete_till_backward(Line *l, Action *a)
         l->cursor = end;
         l->cur_word_idx = word_idx_from_cursor(l);
     }
+    if (start == end)
+        return;
     line_delete_range(l, start, end);
 }
 
