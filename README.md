@@ -36,19 +36,21 @@ The program in itself is fast. But it could be faster.
 Especially when deleting characters.
 
 #### Without compiler optimiztions
-For 5000000 lines
+For `5000000` lines
 ```console
-$ time ./macro -f test1.txt -m"2w;$;2dw;2dfi;^" -d";"
-real    0m52.830s
-user    0m52.764s
-sys     0m0.048s
+$ time ./macro -f test1.txt -m "3w;2dw;dFa" -d";" > /dev/null
+real    0m30.714s
+user    0m30.600s
+sys     0m0.052s
 ```
+
 #### With compiler optimizations
-For 5000000 lines
+For `5000000` lines
 ```console
-$ time ./macro -f test1.txt -m"2w;$;2dw;2dfi;^" -d";"
-real    0m44.922s
-user    0m44.863s
-sys     0m0.056s
+$ time ./macro -f test1.txt -m "3w;2dw;dFa" -d";" > /dev/null
+
+real    0m26.984s
+user    0m26.938s
+sys     0m0.040s
 ```
 
