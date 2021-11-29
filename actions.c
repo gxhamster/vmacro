@@ -160,7 +160,6 @@ void movement_till_backward(Line *l, Action *a)
 }
 
 // Delete action and different variations
-// TODO: Rewrite this that uses less delete functions
 void action_delete_word_forward(Line *l, Action *a) 
 {
     size_t i;
@@ -174,14 +173,17 @@ void action_delete_word_forward(Line *l, Action *a)
     line_delete_range(l, start, end);
 }
 
-// TODO: Rewrite this that uses less delete functions
 void action_delete_word_backward(Line *l, Action *a)
 {
+    char *start, *end;
+    end = l->cursor - 1;
+    start = l->cursor;
     size_t i;
     for (i = 0; i < a->mov.count; i++) {
-        line_delete_word_at_cursor_backward(l);
+        prev_word_start(l);
     }
-
+    start = l->cursor;
+    line_delete_range(l, start, end);
 }
 
 #define SINGLE_CHAR_DEL_LIMIT 1
