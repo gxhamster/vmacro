@@ -16,7 +16,8 @@ const KeyVal mapped_movements[] = {
     {'$', LINE_END},
     {'f', FIND},
     {'F', FIND_BACKWARD},
-    {'t', TILL}
+    {'t', TILL},
+    {'T', TILL_BACKWARD}
 };
 
 // Movements
@@ -124,6 +125,41 @@ void movement_find_backward(Line *l, Action *a)
 
 }
 
+void movement_till(Line *l, Action *a)
+{
+    if (a->command == DELETE) {
+        action_delete_till(l, a);
+        return;
+    }
+    char *cur_pos;
+    size_t i;
+    for (i = 0; i < a->mov.count; i++) {
+        if (a->mov.arg == 0)
+            continue;
+        cur_pos = search_until_char_forward(l, a->mov.arg);
+        l->cursor = cur_pos;
+        l->cur_word_idx = word_idx_from_cursor(l);
+    }
+}
+
+void movement_till_backward(Line *l, Action *a)
+{
+    if (a->command == DELETE) {
+        action_delete_till_backward(l, a);
+        return;
+    }
+    char *cur_pos;
+    size_t i;
+    for (i = 0; i < a->mov.count; i++) {
+        if (a->mov.arg == 0)
+            continue;
+        cur_pos = search_until_char_backward(l, a->mov.arg);
+        l->cursor = cur_pos;
+        l->cur_word_idx = word_idx_from_cursor(l);
+    }
+
+}
+
 // Delete action and different variations
 void action_delete_word_forward(Line *l, Action *a) 
 {
@@ -193,28 +229,62 @@ void action_delete_to_find(Line *l, Action *a)
 {
     char *start, *end;
     size_t i;
+    start = l->cursor;
     for (i = 0; i < a->mov.count; i++) {
         if (a->mov.arg == 0)
             continue;
-        start = l->cursor;
         end = search_char_forward(l, a->mov.arg);
-        line_delete_range(l, start, end);
+        l->cursor = end;
+        l->cur_word_idx = word_idx_from_cursor(l);
     }
+    line_delete_range(l, start, end);
 }
 
 void action_delete_to_find_backward(Line *l, Action *a)
 {
     char *start, *end;
     size_t i;
+    end = l->cursor;
     for (i = 0; i < a->mov.count; i++) {
         if (a->mov.arg == 0)
             continue;
-        end = l->cursor;
         start = search_char_backward(l, a->mov.arg);
-        line_delete_range(l, start, end);
+        l->cursor = start;
+        l->cur_word_idx = word_idx_from_cursor(l);
     }
-
+    line_delete_range(l, start, end);
 }
+
+void action_delete_till(Line *l, Action *a)
+{
+    char *start, *end;
+    size_t i;
+    start = l->cursor;
+    for (i = 0; i < a->mov.count; i++) {
+        if (a->mov.arg == 0)
+            continue;
+        end = search_until_char_forward(l, a->mov.arg);
+        l->cursor = end;
+        l->cur_word_idx = word_idx_from_cursor(l);
+    }
+    line_delete_range(l, start, end);
+}
+
+void action_delete_till_backward(Line *l, Action *a)
+{
+    char *start, *end;
+    size_t i;
+    end = l->cursor;
+    for (i = 0; i < a->mov.count; i++) {
+        if (a->mov.arg == 0)
+            continue;
+        start = search_until_char_backward(l, a->mov.arg);
+        l->cursor = end;
+        l->cur_word_idx = word_idx_from_cursor(l);
+    }
+    line_delete_range(l, start, end);
+}
+
 
 // Helper functions
 

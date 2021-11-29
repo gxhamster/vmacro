@@ -39,6 +39,8 @@ Line *line_delete_char_at_cursor_optimized(Line *l);
 Line *line_delete_range(Line *l, char *start, char *end);
 char *search_char_forward(Line *l, char c);
 char *search_char_backward(Line *l, char c);
+char *search_until_char_forward(Line *l, char c);
+char *search_until_char_backward(Line *l, char c);
 Line *next_word_end(Line *l);
 Line *next_word_start(Line *l);
 Line *prev_word_start(Line *l);

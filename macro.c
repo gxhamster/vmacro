@@ -76,6 +76,38 @@ char *search_char_forward(Line *l, char c)
     return l->cursor;
 }
 
+// Searches the line for c returns the postions before it
+char *search_until_char_forward(Line *l, char c)
+{
+    IS_LINE_NULL(l, NULL); 
+    if (!is_at_line(l, l->cursor + 1)) {
+        return l->cursor;
+    }
+    char *i;
+    for (i = l->cursor + 1; i < &l->src[l->len]; i++) {
+        if (*i == c) {
+            return i - 1;
+        }
+    }
+    return l->cursor;
+}
+
+// Searches the line backwards for c returns the postions after it
+char *search_until_char_backward(Line *l, char c)
+{
+    IS_LINE_NULL(l, NULL); 
+    if (!is_at_line(l, l->cursor - 1)) {
+        return l->cursor;
+    }
+    char *i;
+    for (i = l->cursor - 1; i >= l->src; i--) {
+        if (*i == c) {
+            return i + 1;
+        }
+    }
+    return l->cursor;
+}
+
 Line *set_cursor_at_start(Line *l)
 {
     IS_LINE_NULL(l, NULL);
@@ -483,6 +515,12 @@ Line *eval_action_on_line(Line *l, Action *a)
             break;
         case FIND_BACKWARD:
             movement_find_backward(l, a);
+            break;
+        case TILL:
+            movement_till(l, a);
+            break;
+        case TILL_BACKWARD:
+            movement_till_backward(l, a);
             break;
         default:
             assert(0 && "Cannot identify the movement\n");

@@ -5,7 +5,9 @@
 
 // All actions and movements
 enum { DELETE = 1 };
-enum { FORWARD = 1, BACKWARD, WORD_FORWARD, WORD_BACKWARD, FIND, FIND_BACKWARD, TILL, LINE_START, LINE_END }; 
+enum { FORWARD = 1, BACKWARD, WORD_FORWARD, WORD_BACKWARD, 
+       FIND, FIND_BACKWARD, TILL, TILL_BACKWARD, LINE_START, 
+       LINE_END }; 
 
 typedef struct {
     char identifier;
@@ -31,6 +33,8 @@ void movement_line_start(Line *l, Action *a);
 void movement_line_end(Line *l, Action *a);
 void movement_find(Line *l, Action *a);
 void movement_find_backward(Line *l, Action *a);
+void movement_till(Line *l, Action *a);
+void movement_till_backward(Line *l, Action *a);
 
 void action_delete_word_forward(Line *l, Action *a);
 void action_delete_word_backward(Line *l, Action *a);
@@ -40,6 +44,8 @@ void action_delete_to_line_end(Line *l, Action *a);
 void action_delete_to_line_start(Line *l, Action *a);
 void action_delete_to_find(Line *l, Action *a);
 void action_delete_to_find_backward(Line *l, Action *a);
+void action_delete_till(Line *l, Action *a);
+void action_delete_till_backward(Line *l, Action *a);
 
 bool is_action(char c);
 bool is_movement(char c);
