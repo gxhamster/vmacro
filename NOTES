@@ -21,4 +21,10 @@ T -> till backward
 
 TODO: Seperate things (Done)
 
-- FIXME: Deleting a lot of characters individually is very slow (Eg: 40dh)
+- FIXME: Deleting a lot of characters individually is very slow (Eg: 40dh) (DONE)
+
+- FIXME: There are some inconsistencies with the behavoiur. Especially with moving the cursor
+         after deleting characters.
+
+
+

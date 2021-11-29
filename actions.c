@@ -15,6 +15,7 @@ const KeyVal mapped_movements[] = {
     {'^', LINE_START},
     {'$', LINE_END},
     {'f', FIND},
+    {'F', FIND_BACKWARD},
     {'t', TILL}
 };
 
@@ -105,7 +106,24 @@ void movement_find(Line *l, Action *a)
 
 }
 
-#define SINGLE_WORD_DEL_LIMIT 1
+void movement_find_backward(Line *l, Action *a)
+{
+    if (a->command == DELETE) {
+        action_delete_to_find_backward(l, a);
+        return;
+    }
+    size_t i;
+    char *cur_pos;
+    for (i = 0; i < a->mov.count; i++) {
+        if (a->mov.arg == 0)
+            continue;
+        cur_pos = search_char_backward(l, a->mov.arg);
+        l->cursor = cur_pos;
+        l->cur_word_idx = word_idx_from_cursor(l);
+    }
+
+}
+
 // Delete action and different variations
 void action_delete_word_forward(Line *l, Action *a) 
 {
@@ -182,6 +200,20 @@ void action_delete_to_find(Line *l, Action *a)
         end = search_char_forward(l, a->mov.arg);
         line_delete_range(l, start, end);
     }
+}
+
+void action_delete_to_find_backward(Line *l, Action *a)
+{
+    char *start, *end;
+    size_t i;
+    for (i = 0; i < a->mov.count; i++) {
+        if (a->mov.arg == 0)
+            continue;
+        end = l->cursor;
+        start = search_char_backward(l, a->mov.arg);
+        line_delete_range(l, start, end);
+    }
+
 }
 
 // Helper functions

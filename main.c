@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <getopt.h>
 #include <unistd.h>
 #include "macro.h"
 #include "actions.h"

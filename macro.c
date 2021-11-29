@@ -481,6 +481,9 @@ Line *eval_action_on_line(Line *l, Action *a)
         case FIND:
             movement_find(l, a);
             break;
+        case FIND_BACKWARD:
+            movement_find_backward(l, a);
+            break;
         default:
             assert(0 && "Cannot identify the movement\n");
     }
@@ -511,7 +514,7 @@ Line process_line(char *buf_src, size_t size)
     // TODO: implement way to find words without using strtok 
     char *token;
     size_t token_size;
-    const char *delim = "-.\t ";
+    const char *delim = "-.\t, ";
     token = strtok(buf, delim);
     while (token != NULL) {
         token_size = strlen(token);
