@@ -191,7 +191,16 @@ Line *prev_word_start(Line *l)
         l->cur_word_idx = 0;
         return l;
     }
-    char *start = l->words[l->cur_word_idx - 1 ].start;      
+    char *start;
+    // If cursor in current word move it to start of cur word
+    Word *word = &l->words[l->cur_word_idx];
+    if (l->cursor > word->start && l->cursor <= word->end) {
+        start = l->words[l->cur_word_idx].start;
+        l->cursor = start;
+        return l;
+    }
+
+    start = l->words[l->cur_word_idx - 1 ].start;      
     l->cursor = start;
     l->cur_word_idx -= 1; 
 
