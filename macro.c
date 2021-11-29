@@ -236,9 +236,9 @@ Line *next_word_end(Line *l)
 Line *next_word_start(Line *l)
 {
     if (l->cur_word_idx + 1 > l->n_words - 1) {
-        l->cursor = l->words[l->n_words - 1].start;
-        l->cur_word_idx = l->n_words - 1;
-        return l;
+        if (is_at_line(l, l->cursor)) {
+            return l;
+        }
     }
     char *start = l->words[l->cur_word_idx+1].start;      
     l->cursor = start;
@@ -257,7 +257,7 @@ size_t word_idx_from_cursor(Line *l)
     size_t i;
     char *start;
     char *end;
-    for (i = 0; i < l->len; i++) {
+    for (i = 0; i < l->n_words; i++) {
         start = l->words[i].start;
         end = l->words[i].end;
         if (l->cursor >= start && l->cursor <= end) {
@@ -561,7 +561,7 @@ Line process_line(char *buf_src, size_t size)
     // TODO: implement way to find words without using strtok 
     char *token;
     size_t token_size;
-    const char *delim = "-.\t, ";
+    const char *delim = "\t ";
     token = strtok(buf, delim);
     while (token != NULL) {
         token_size = strlen(token);

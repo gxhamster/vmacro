@@ -160,14 +160,21 @@ void movement_till_backward(Line *l, Action *a)
 }
 
 // Delete action and different variations
+// TODO: Rewrite this that uses less delete functions
 void action_delete_word_forward(Line *l, Action *a) 
 {
     size_t i;
+    char *start, *end;
+    start = l->cursor;
+    end = l->cursor;
     for (i = 0; i < a->mov.count; i++) {
-        line_delete_word_at_cursor(l);
+        next_word_start(l);
     }
+    end = l->cursor - 1;
+    line_delete_range(l, start, end);
 }
 
+// TODO: Rewrite this that uses less delete functions
 void action_delete_word_backward(Line *l, Action *a)
 {
     size_t i;
