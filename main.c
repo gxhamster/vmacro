@@ -53,7 +53,7 @@ static void print_help()
     printf("%s\n", help);
 }
 
-#define MAX_ACTIONS 10
+#define MAX_ACTIONS 50
 static Args handle_args(int argc, char **argv)
 {
     if (argv == NULL) {
@@ -129,6 +129,11 @@ static Args handle_args(int argc, char **argv)
         token = strtok(NULL, delim);
     }
     
+    if (actions_str_count > MAX_ACTIONS) {
+        ERROR("number of actions is greater than MAX_ACTIONS");
+        exit(-1);
+    }
+
     Args args = {actions_str, file_name, actions_str_count, pretty_print};
     return args;
 

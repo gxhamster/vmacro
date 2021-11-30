@@ -314,7 +314,8 @@ void action_insert_at_cursor(Line *l, Action *a)
 {
     char buf[TEMP_BUF_LEN] = {0};
     char *temp_buf = buf;
-    int cur_offset = l->cursor - l->src;
+    // If cursor is at end of line insert after cursor
+    int cur_offset = (l->cursor == line_get_end_ptr(l)) ? l->cursor - l->src + 1 : l->cursor - l->src;
     // Copy everything before cursor
     memcpy(temp_buf, l->src, cur_offset);
     // Copy insert text at cursor
@@ -329,8 +330,7 @@ void action_insert_at_cursor(Line *l, Action *a)
     free_line(l);
     Line l_new = process_line(buf, new_len);
     *l = l_new;
-    // FIXME: If we insert a whitespace using insert
-    // word_idx_from_cursor will return 0
+
     l->cursor = l->src + cur_offset;
     if (is_delim_whitespace(*l->cursor)) {
         l->cur_word_idx = prev_word_idx;
