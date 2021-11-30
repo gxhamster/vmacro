@@ -3,19 +3,26 @@
 ## What is this program
 
 Vmacro is a simple utility to execute vim style macros on each line of a file.
-Although all I was not able to include all commands of vim yet. I dont think I 
-will implement inserting characters.
+I am not able to include all commands of vim yet. It can also insert
+chracters. Although this will be much more faster than doing it inside vim.
+The idea was that you give certain vim macros seperated by a delimeter and
+the program will execute that macro on each line.
 
 ### Remember!
 The behaviour of the commands might not be exactly like in vim.
 The goal was to create a tool that does it similar to vim.
-Also there might be some bugs.
+Also there might be some bugs. This tool was created to learn more
+about how vim macros might work and beacause how slow vim macros can 
+be when done over many lines.
 
 ## Examples
+The -p flag will prettify the output, showing the location of
+the cursor. Omit it if you are outputting to a file instead.
 
 ```console
+./macro -f test1 -m "$;4db;h;i Hello;f.;dh" -d ";" -p 
 ./macro -f test.txt -m "2l;dw" -d ";"
-./macro -f test.txt -m "2dw"
+./macro -f test.txt -m "2dw" > test1.txt
 
 ```
 
@@ -23,35 +30,41 @@ Also there might be some bugs.
 
 The Project has a simple `Makefile` to execute
 The `Makefile` has two options debug (which includes debug symbols)
-and all (compiler optimizations turned on).
+and all (compiler optimizations turned on). If you are going to use the tool
+i highly recommend to use `make all` command.
 
 ```console
 $ make debug
-$ ./macro -f test.txt -m "3fp;l;d$" -d";"
+$ ./macro -f test.txt -m "3fp;l;d$" -d";" -p 
 $ |I am so happy this p|
                       ^
 ```
 
 ### Performace
-The program in itself is fast. But it could be faster.
-Especially when deleting characters.
+One of the goals of this tool was to make it be able to handle 
+a lot of lines easily. The program in itself is fast. But it 
+could be faster. Any kind of deleting would obviously be slower
+than not doing it, as you constantly creating new buffers to store lines
+and identifying the words again.
 
 #### Without compiler optimiztions
 For `5000000` lines
 ```console
-$ time ./macro -f test1.txt -m "3w;2dw;dFa" -d";" > /dev/null
-real    0m30.714s
-user    0m30.600s
-sys     0m0.052s
+$ time ./macro -f test1 -m "$;4db;h;i Hello;f.;dh" -d ";" > /dev/null
+real    0m53.863s
+user    0m53.838s
+sys     0m0.036s
 ```
 
 #### With compiler optimizations
 For `5000000` lines
 ```console
-$ time ./macro -f test1.txt -m "3w;2dw;dFa" -d";" > /dev/null
-
-real    0m26.984s
-user    0m26.938s
+$ time ./macro -f test1 -m "$;4db;h;i Hello;f.;dh" -d ";" > /dev/null
+real    0m34.968s
+user    0m34.924s
 sys     0m0.040s
 ```
 
+#### Contributing
+If anyone wishes to contribute. You are welcome to do so by opening 
+a pull request. Anyone is free to use this tool. 
