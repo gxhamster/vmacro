@@ -4,7 +4,7 @@
 #include "macro.h"
 
 // All actions and movements
-enum { DELETE = 1 };
+enum { DELETE = 1, INSERT };
 enum { FORWARD = 1, BACKWARD, WORD_FORWARD, WORD_BACKWARD, 
        FIND, FIND_BACKWARD, TILL, TILL_BACKWARD, LINE_START, 
        LINE_END }; 
@@ -16,10 +16,17 @@ typedef struct {
     size_t count;
 } Movement;
 
+#define MAX_INSERT_LEN 20
+typedef struct {
+    char text[MAX_INSERT_LEN];
+    size_t len;
+} Insert;
+
 typedef struct {
     char identifier;
     int command;
-    Movement mov; 
+    Movement mov;
+    Insert ins;
 } Action;
 
 Action process_actions(char *action_str, size_t len);
@@ -46,6 +53,8 @@ void action_delete_to_find(Line *l, Action *a);
 void action_delete_to_find_backward(Line *l, Action *a);
 void action_delete_till(Line *l, Action *a);
 void action_delete_till_backward(Line *l, Action *a);
+
+void action_insert_at_cursor(Line *l, Action *a);
 
 bool is_action(char c);
 bool is_movement(char c);

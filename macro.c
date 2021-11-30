@@ -374,6 +374,14 @@ Line *line_delete_range(Line *l, char *start, char *end)
 // Execute an action on a line
 Line *eval_action_on_line(Line *l, Action *a)
 {
+    // After insert command is found no reason to continue
+    // as everything after it is considered text
+    switch (a->command) {
+        case INSERT:
+            action_insert_at_cursor(l, a);
+            return l;
+    }
+
     switch (a->mov.command) {
         case FORWARD:
             movement_forward(l, a);
@@ -408,6 +416,7 @@ Line *eval_action_on_line(Line *l, Action *a)
         default:
             assert(0 && "Cannot identify the movement\n");
     }
+
     
     return l;
 }

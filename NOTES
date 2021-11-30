@@ -3,28 +3,11 @@ exactly like vim
 Creating a program that could process a vim macro
 and execute that macro on each line on a file
 
--- Things to do --
-
-- Identify words (DONE)
-- Commands: d (DONE)
-
-TODO: Add extra vim commands
-f -> find (DONE)
-t -> till
-0 -> start of line
-^ -> start of first word
-$ -> end of line
-F -> search backward
-T -> till backward
-
-- Also able to insert characters
-
-TODO: Seperate things (Done)
-
-- FIXME: Deleting a lot of characters individually is very slow (Eg: 40dh) (DONE)
-
-- FIXME: There are some inconsistencies with the behavoiur. Especially with moving the cursor
-         after deleting characters.
+-- Tasks --
+* Multihreading (Not important)
 
 
+-- Progress -- 
+* Inserting characters at cursor (progress)
 
+-- Done --

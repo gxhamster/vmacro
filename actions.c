@@ -1,10 +1,12 @@
+#include <string.h>
 #include "actions.h"
 
 // This file defines what each vim action and movement does. 
 
 // Please add any new movement or action here too
 const KeyVal mapped_actions[] = {
-    {'d', DELETE}
+    {'d', DELETE},
+    {'i', INSERT},
 };
 
 const KeyVal mapped_movements[] = {
@@ -305,6 +307,29 @@ void action_delete_till_backward(Line *l, Action *a)
     line_delete_range(l, start, end);
 }
 
+// Insert action function
+#define TEMP_BUF_LEN 100
+void action_insert_at_cursor(Line *l, Action *a)
+{
+    char buf[TEMP_BUF_LEN] = {0};
+    char *temp_buf = buf;
+    int cur_offset = l->cursor - l->src;
+    // Copy everything before cursor
+    memcpy(temp_buf, l->src, cur_offset);
+    // Copy insert text at cursor
+    memcpy(temp_buf + cur_offset, a->ins.text, a->ins.len);
+    char *last_pos_src = &l->src[l->len];
+    // Copy whats left of src to temp_buf
+    memcpy(temp_buf + cur_offset + a->ins.len, l->src + cur_offset, last_pos_src - l->cursor + 1);
+    
+    // Create new line with new src
+    size_t new_len = strlen(buf);
+    free_line(l);
+    Line l_new = process_line(buf, new_len);
+    *l = l_new;
+    l->cursor = l->src + cur_offset;
+    l->cur_word_idx = word_idx_from_cursor(l);
+}
 
 // Helper functions
 
@@ -370,10 +395,13 @@ Action process_actions(char *action_str, size_t len)
 
     Action a = {0};
     Movement m = {0};
+    memset(a.ins.text, 0, MAX_INSERT_LEN);
     char num_buffer[10] = {0};
+    char *insert_buffer = a.ins.text;
     size_t num_buffer_count = 0;
     bool found_action = false;
     bool found_movement = false;
+
     size_t i;
     for (i = 0; i < len; i++) {
         // If a number 
@@ -383,10 +411,19 @@ Action process_actions(char *action_str, size_t len)
         }  
         if (found_action == false) {
             if (is_action(action_str[i])) {
+                // If an insert identifier is found
+                if (action_get_value_for_key(action_str[i]) == INSERT) {
+                    a.identifier = action_str[i];
+                    a.command = INSERT;
+                    i++;
+                    a.ins.len = len - i;
+                    memcpy(insert_buffer, &action_str[i], len - i + 1);
+                    return a; 
+                }
                 a.identifier = action_str[i];
                 a.command = action_get_value_for_key(action_str[i]);
                 found_action = true;
-            }
+            }         
         }  
         if (found_movement == false) {
             if (is_movement(action_str[i])) {
