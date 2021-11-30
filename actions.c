@@ -1,4 +1,5 @@
 #include <string.h>
+#include <assert.h>
 #include "actions.h"
 
 // This file defines what each vim action and movement does. 
@@ -171,7 +172,7 @@ void action_delete_word_forward(Line *l, Action *a)
     for (i = 0; i < a->mov.count; i++) {
         next_word_start(l);
     }
-    end = l->cursor - 1;
+    end = (l->cursor - 1 > start) ? l->cursor - 1 : l->cursor;
     line_delete_range(l, start, end);
 }
 
@@ -308,7 +309,7 @@ void action_delete_till_backward(Line *l, Action *a)
 }
 
 // Insert action function
-#define TEMP_BUF_LEN 100
+#define TEMP_BUF_LEN 200
 void action_insert_at_cursor(Line *l, Action *a)
 {
     char buf[TEMP_BUF_LEN] = {0};
@@ -323,12 +324,19 @@ void action_insert_at_cursor(Line *l, Action *a)
     memcpy(temp_buf + cur_offset + a->ins.len, l->src + cur_offset, last_pos_src - l->cursor + 1);
     
     // Create new line with new src
+    size_t prev_word_idx = l->cur_word_idx;
     size_t new_len = strlen(buf);
     free_line(l);
     Line l_new = process_line(buf, new_len);
     *l = l_new;
+    // FIXME: If we insert a whitespace using insert
+    // word_idx_from_cursor will return 0
     l->cursor = l->src + cur_offset;
-    l->cur_word_idx = word_idx_from_cursor(l);
+    if (is_delim_whitespace(*l->cursor)) {
+        l->cur_word_idx = prev_word_idx;
+    } else {
+        l->cur_word_idx = word_idx_from_cursor(l);
+    }
 }
 
 // Helper functions
@@ -417,6 +425,7 @@ Action process_actions(char *action_str, size_t len)
                     a.command = INSERT;
                     i++;
                     a.ins.len = len - i;
+                    assert(a.ins.len < MAX_INSERT_LEN);
                     memcpy(insert_buffer, &action_str[i], len - i + 1);
                     return a; 
                 }

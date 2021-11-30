@@ -268,7 +268,7 @@ size_t word_idx_from_cursor(Line *l)
         }
     }
 
-    return 0;
+    return l->cur_word_idx;
 }
 
 
@@ -316,6 +316,10 @@ Line *line_delete_char_at_cursor(Line *l)
     *l = l_new;
 
     l->cursor = l->src + offset;
+    // If an empty line is at the cursor move back
+    if (*l->cursor == '\0')
+        prev_char(l);
+
     l->cur_word_idx = word_idx_from_cursor(l); 
     return l;
 }
@@ -365,8 +369,10 @@ Line *line_delete_range(Line *l, char *start, char *end)
     Line line = process_line(new_src, new_src_count);
     *l = line;
     l->cursor = l->src + offset;
+    // If an empty line is at the cursor move back
+    if (*l->cursor == '\0')
+        prev_char(l);
     l->cur_word_idx = word_idx_from_cursor(l);
-
     return l;
 }
 

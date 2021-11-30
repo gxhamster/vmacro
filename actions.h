@@ -16,7 +16,7 @@ typedef struct {
     size_t count;
 } Movement;
 
-#define MAX_INSERT_LEN 20
+#define MAX_INSERT_LEN 50
 typedef struct {
     char text[MAX_INSERT_LEN];
     size_t len;
