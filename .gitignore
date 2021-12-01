@@ -1,6 +1,7 @@
-macro
+vmacro
 test.txt
 tags
 analysis*
 gmon.out
 test*.txt
+test*

@@ -7,6 +7,9 @@
 #include "macro.h"
 #include "actions.h"
 
+#define VERSION "0.1"
+#define AUTHOR "gxhamster"
+
 typedef struct {
     char **actions_str;
     char *file_name;
@@ -52,10 +55,21 @@ static char *read_from_file(FILE *fp, Args *args)
     return NULL;
 }
 
+static void print_version()
+{
+    printf("vmacro %s\n", VERSION);
+}
+
 static void print_help() 
 {
+    const char help_extended[] = "Execute vim commands on lines\n\
+Example: macro -f test.txt -m '2w;dw;iHello' -d ';'\n\
+If no file is given it will read from stdin\n\n \
+-d      Delimeter to use when using multiple macros\n \
+-f      Name of file to read from\n \
+-m      The macro to execute on each line\n";
     const char help[] = "Usage: macro -d [delimiter] -f [filename] -m [macro]";
-    printf("%s\n", help);
+    printf("%s\n%s", help, help_extended);
 }
 
 #define MAX_ACTIONS 50
@@ -74,7 +88,7 @@ static Args handle_args(int argc, char **argv)
     bool stdout_input = false;
     char c;
     // FIXME: values from optarg might get overwritten
-    while ((c = getopt(argc, argv, ":d:m:f:ps")) != -1) {
+    while ((c = getopt(argc, argv, ":d:m:f:pshv")) != -1) {
         switch (c) {
             case 'd':
                 delim = optarg;
@@ -94,6 +108,12 @@ static Args handle_args(int argc, char **argv)
             case 's':
                 stdout_input = true;
                 break;
+            case 'v':
+                print_version();
+                exit(-1);
+            case 'h':
+                print_help();
+                exit(-1);
             case ':':
                 printf("ERROR: Option needs value\n");
                 break;

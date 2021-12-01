@@ -1,5 +1,5 @@
 CC=gcc
-OUT=macro
+OUT=vmacro
 CFLAGS=-Wall -Wextra -O3 -std=c11 -pedantic
 CFLAGS_G=-Wall -Wextra -ggdb -p -std=c11 -pedantic
 
