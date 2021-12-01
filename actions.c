@@ -207,7 +207,8 @@ void action_delete_word_forward(Line *l, Action *a)
     for (i = 0; i < a->mov.count; i++) {
         next_word_start(l);
     }
-    end = (l->cursor - 1 > start) ? l->cursor - 1 : l->cursor;
+    // If it is the last word remove to last character
+    end = (l->cur_word_idx != l->n_words - 1) ? l->cursor - 1 : line_get_end_ptr(l);
     line_delete_range(l, start, end);
 }
 
@@ -261,7 +262,6 @@ void action_delete_to_line_end(Line *l, Action *a)
 {
     (void) a;
     line_delete_range(l, l->cursor, line_get_end_ptr(l));
-    prev_char(l);
 }
 
 void action_delete_to_line_start(Line *l, Action *a)
