@@ -6,8 +6,7 @@
 
 // Please add any new movement or action here too
 const KeyVal mapped_actions[] = {
-    {'d', DELETE},
-    {'i', INSERT},
+    {'d', DELETE}, {'i', INSERT},
 };
 
 const KeyVal mapped_movements[] = {
@@ -20,7 +19,9 @@ const KeyVal mapped_movements[] = {
     {'f', FIND},
     {'F', FIND_BACKWARD},
     {'t', TILL},
-    {'T', TILL_BACKWARD}
+    {'T', TILL_BACKWARD},
+    {'/', SEARCH_FORWARD},
+    {'?', SEARCH_BACKWARD}
 };
 
 // Movements
@@ -160,6 +161,40 @@ void movement_till_backward(Line *l, Action *a)
         l->cursor = cur_pos;
         l->cur_word_idx = word_idx_from_cursor(l);
     }
+}
+
+void movement_search(Line *l, Action *a)
+{
+    if (a->command == DELETE) {
+        action_delete_search(l, a);
+        return;
+    }
+    char *cur_pos;
+    char *old_pos = l->cursor;
+    if (a->mov.s_text.text[0] == '\0')
+        return;
+    next_char(l);
+    cur_pos = line_search_str(l, a->mov.s_text.text, a->mov.count);
+    cur_pos = (cur_pos) ? cur_pos : old_pos;
+    l->cursor = cur_pos;
+    l->cur_word_idx = word_idx_from_cursor(l);
+}
+
+void movement_search_backward(Line *l, Action *a)
+{
+    if (a->command == DELETE) {
+        action_delete_search_backward(l, a);
+        return;
+    }
+    char *cur_pos;
+    char *old_pos = l->cursor;
+    if (a->mov.s_text.text[0] == '\0')
+        return;
+    prev_char(l);
+    cur_pos = line_search_str_backward(l, a->mov.s_text.text, a->mov.count);
+    cur_pos = (cur_pos) ? cur_pos : old_pos;
+    l->cursor = cur_pos;
+    l->cur_word_idx = word_idx_from_cursor(l);
 }
 
 // Delete action and different variations
@@ -339,6 +374,38 @@ void action_insert_at_cursor(Line *l, Action *a)
     }
 }
 
+void action_delete_search(Line *l, Action *a)
+{
+    char *cur_pos;
+    char *old_pos = l->cursor;
+    if (a->mov.s_text.text[0] == '\0')
+        return;
+    next_char(l);
+    cur_pos = line_search_str(l, a->mov.s_text.text, a->mov.count);
+    cur_pos = (cur_pos) ? cur_pos : old_pos;
+    if (cur_pos != old_pos) {
+        l->cursor = cur_pos;
+        l->cur_word_idx = word_idx_from_cursor(l);
+        line_delete_range(l, old_pos, cur_pos - 1);
+    }
+}
+
+void action_delete_search_backward(Line *l, Action *a)
+{
+    char *cur_pos;
+    char *old_pos = l->cursor;
+    if (a->mov.s_text.text[0] == '\0')
+        return;
+    prev_char(l);
+    cur_pos = line_search_str_backward(l, a->mov.s_text.text, a->mov.count);
+    cur_pos = (cur_pos) ? cur_pos : old_pos;
+    if (cur_pos != old_pos) {
+        l->cursor = cur_pos;
+        l->cur_word_idx = word_idx_from_cursor(l);
+        line_delete_range(l, cur_pos + 1, old_pos);
+    }
+}
+
 // Helper functions
 
 bool is_movement(char c)
@@ -404,8 +471,10 @@ Action process_actions(char *action_str, size_t len)
     Action a = {0};
     Movement m = {0};
     memset(a.ins.text, 0, MAX_INSERT_LEN);
+    memset(m.s_text.text, 0, MAX_SEARCH_LEN);
     char num_buffer[10] = {0};
     char *insert_buffer = a.ins.text;
+    char *search_buffer = m.s_text.text;
     size_t num_buffer_count = 0;
     bool found_action = false;
     bool found_movement = false;
@@ -439,6 +508,14 @@ Action process_actions(char *action_str, size_t len)
                 m.identifier = action_str[i];
                 m.command = movement_get_value_for_key(action_str[i]);
                 found_movement = true;
+                // If search ? or /
+                if (m.command == SEARCH_FORWARD || m.command == SEARCH_BACKWARD) {
+                    i++;
+                    m.s_text.len = len - i;
+                    assert(a.ins.len < MAX_SEARCH_LEN);
+                    memcpy(search_buffer, &action_str[i], len - i + 1);
+                    break;
+                }
             }
         } else if (found_movement) {
             m.arg = action_str[i];

@@ -6,8 +6,9 @@ and execute that macro on each line on a file
 -- Tasks --
 * Multihreading (Not important)
 * Optimzing process_line
+* Searching in the line
 
 -- Progress -- 
 
 -- Done --
-* Inserting characters at cursor (progress)
+* Inserting characters at cursor 

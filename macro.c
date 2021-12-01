@@ -37,10 +37,88 @@ bool is_at_line(Line *l, char *ptr)
     return false;
 }
 
+// Reverse version of strstr searches backward for target
+// if target is found and is below or equal to limit it will return
+// its pos
+char *strstrr(const char *source, const char *target, const char *limit)
+{
+    const char *current;
+    const char *found = NULL;
+
+    if (*target == '\0')
+        return (char *) source;
+
+    size_t target_length = strlen(target);
+    current = source + strlen(source) - target_length;
+
+    while ( current >= source ) {
+        found = strstr(current, target);
+        if (found && found <= limit) {
+            break;
+        }
+        current -= 1;
+    }
+
+    return (char *) found;
+}
+
 char *line_get_end_ptr(Line *l)
 {
     IS_LINE_NULL(l, NULL);
     return &l->src[l->len - 1];
+}
+
+// Searches for str from cursor to end of line.
+char *line_search_str(Line *l, char *str, size_t count)
+{
+    char *cur_pos = l->cursor;
+    char *prev_result = NULL;
+    char *result = NULL;
+    size_t found = 0;
+    size_t i;
+    for (i = 0; i < count; i++) {
+        result = strstr(cur_pos, str);
+        if (result) {
+            found++;
+            cur_pos = result + 1;
+            prev_result = result;
+            if (found == count) {
+                return result;
+            }
+            continue;
+        }
+        break;
+    }
+    if (prev_result)
+        return prev_result;
+    
+    return NULL;
+}
+
+// Searches for str from cursor to end of line.
+char *line_search_str_backward(Line *l, char *str, size_t count)
+{
+    char *cur_pos = l->cursor;
+    char *prev_result = NULL;
+    char *result = NULL;
+    size_t found = 0;
+    size_t i;
+    for (i = 0; i < count; i++) {
+        result = strstrr(l->src, str, cur_pos);
+        if (result && result <= cur_pos) {
+            found++;
+            cur_pos = result - 1;
+            prev_result = result;
+            if (found == count) {
+                return result;
+            }
+            continue;
+        }
+    }
+    if (prev_result)
+        return prev_result;
+    
+    return NULL;
 }
 
 // Searches the line for c from cursor to start
@@ -135,7 +213,7 @@ Line *prev_char(Line *l)
         return NULL;
     }
     Word *word = &l->words[l->cur_word_idx];
-    Word *word_prev = ((int)l->cur_word_idx + -1 > 0) ? NULL : &l->words[l->cur_word_idx - 1];
+    Word *word_prev = ((int)l->cur_word_idx - 1 >= 0) ? &l->words[l->cur_word_idx - 1] : NULL;
     bool is_word_prev = (word_prev == NULL) ? false : true;
 
     char *new_cursor_pos = l->cursor - 1;
@@ -418,6 +496,12 @@ Line *eval_action_on_line(Line *l, Action *a)
             break;
         case TILL_BACKWARD:
             movement_till_backward(l, a);
+            break;
+        case SEARCH_FORWARD:
+            movement_search(l, a);
+            break;
+        case SEARCH_BACKWARD:
+            movement_search_backward(l, a);
             break;
         default:
             assert(0 && "Cannot identify the movement\n");

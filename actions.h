@@ -7,13 +7,20 @@
 enum { DELETE = 1, INSERT };
 enum { FORWARD = 1, BACKWARD, WORD_FORWARD, WORD_BACKWARD, 
        FIND, FIND_BACKWARD, TILL, TILL_BACKWARD, LINE_START, 
-       LINE_END }; 
+       LINE_END, SEARCH_FORWARD, SEARCH_BACKWARD }; 
+
+#define MAX_SEARCH_LEN 100
+typedef struct {
+    char text[MAX_SEARCH_LEN];
+    size_t len;
+} SearchText;
 
 typedef struct {
     char identifier;
     int command;
     char arg;
     size_t count;
+    SearchText s_text;
 } Movement;
 
 #define MAX_INSERT_LEN 50
@@ -42,6 +49,8 @@ void movement_find(Line *l, Action *a);
 void movement_find_backward(Line *l, Action *a);
 void movement_till(Line *l, Action *a);
 void movement_till_backward(Line *l, Action *a);
+void movement_search(Line *l, Action *a);
+void movement_search_backward(Line *l, Action *a);
 
 void action_delete_word_forward(Line *l, Action *a);
 void action_delete_word_backward(Line *l, Action *a);
@@ -53,6 +62,8 @@ void action_delete_to_find(Line *l, Action *a);
 void action_delete_to_find_backward(Line *l, Action *a);
 void action_delete_till(Line *l, Action *a);
 void action_delete_till_backward(Line *l, Action *a);
+void action_delete_search(Line *l, Action *a);
+void action_delete_search_backward(Line *l, Action *a);
 
 void action_insert_at_cursor(Line *l, Action *a);
 

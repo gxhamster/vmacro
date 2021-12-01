@@ -46,6 +46,8 @@ Line *next_char(Line *l);
 Line *prev_char(Line *l);
 Line *set_cursor_at_start(Line *l);
 Line *set_cursor_at_end(Line *l);
+char *line_search_str(Line *l, char *str, size_t count);
+char *line_search_str_backward(Line *l, char *str, size_t count);
 
 char *line_get_end_ptr(Line *l);
 bool is_at_line(Line *l, char *ptr);
@@ -53,6 +55,7 @@ size_t word_idx_from_cursor(Line *l);
 void free_line(Line *l);
 void pretty_print_line(Line *l);
 bool is_delim(char c);
+char *strstrr(const char *source, const char *target, const char *limit);
 bool is_delim_whitespace(char c);
 
 #endif
