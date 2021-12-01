@@ -18,22 +18,22 @@ be when done over many lines.
 
 ### Supported movements and actions
 ##### Movments
-- w -> Word forward
-- b -> Word backward
-- l -> Character forward
-- h -> Character backward
-- ^ -> Start of line
-- f -> Find character
-- F -> Find character backward
-- t -> Till character
-- T -> Till character backward
-- $ -> End of line
-- / -> Search forwards
-- ? -> Search backward
+- `w` Word forward
+- `b` Word backward
+- `l` Character forward
+- `h` Character backward
+- `^` Start of line
+- `f` Find character
+- `F` Find character backward
+- `t` Till character
+- `T` Till character backward
+- `$` End of line
+- `/` Search forwards
+- `?` Search backward
 
 ##### Actions
-- i -> Insert characters at cursor
-- d -> Delete action (usually assciated with a movement)
+- `i` Insert characters at cursor
+- `d` Delete action (usually assciated with a movement)
 
 With most of these movments you can give a count of how many times to 
 repeat it. An action can also given to it. Currently there is only delete
