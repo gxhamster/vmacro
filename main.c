@@ -7,6 +7,7 @@
 #include "macro.h"
 #include "actions.h"
 
+#define NAME vmacro
 #define VERSION "0.1"
 #define AUTHOR "gxhamster"
 
@@ -63,12 +64,12 @@ static void print_version()
 static void print_help() 
 {
     const char help_extended[] = "Execute vim commands on lines\n\
-Example: macro -f test.txt -m '2w;dw;iHello' -d ';'\n\
+Example: vmacro -f test.txt -m '2w;dw;iHello' -d ';'\n\
 If no file is given it will read from stdin\n\n \
 -d      Delimeter to use when using multiple macros\n \
 -f      Name of file to read from\n \
 -m      The macro to execute on each line\n";
-    const char help[] = "Usage: macro -d [delimiter] -f [filename] -m [macro]";
+    const char help[] = "Usage: vmacro -d [delimiter] -f [filename] -m [macro]";
     printf("%s\n%s", help, help_extended);
 }
 

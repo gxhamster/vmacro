@@ -6,6 +6,8 @@ and execute that macro on each line on a file
 -- Tasks --
 * Multihreading (Not important)
 * Optimzing process_line
+* Add change command (Eg: cw)
+  Will delete word and insert
 
 -- Progress -- 
 
