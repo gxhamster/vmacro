@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <ctype.h>
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h> 
@@ -513,21 +514,12 @@ Line *eval_action_on_line(Line *l, Action *a)
 
 bool is_delim(char c)
 {
-    switch (c) {
-        case ' ':
-        case '-':
-        case '.':
-        case '/':
-        case '\t':
-            return true;
-        default:
-            return false;
-    }
+    return !isalnum(c) || isspace(c);
 }
 
 bool is_delim_whitespace(char c)
 {
-    return (c == ' ' || c== '\t') ? true : false; 
+    return (c == ' ' || c == '\t') ? true : false; 
 }
 
 enum { WORD_START, IN_WORD, IN_DELIM };
