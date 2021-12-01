@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <assert.h>
 #include <string.h>
 #include <stdarg.h>
 #include <getopt.h>
@@ -11,6 +12,7 @@ typedef struct {
     char *file_name;
     size_t num_of_actions;
     bool pretty_print;
+    bool stdout_input;
 } Args;
 
 
@@ -20,19 +22,22 @@ void free_args(Args *args)
     args->file_name = NULL;
 }
 
-#define MAX_BUF_READ 100
+#define MAX_BUF_READ 200
 static char *read_from_file(FILE *fp, Args *args)
 {
-    if (fp == NULL) {
-        ERROR("File handler is not valid");
-        exit(-1);
+    // No file handler given read from stdin
+    if (fp == NULL || args->stdout_input) {
+        fp = stdin;
     }
 
     char buf[MAX_BUF_READ];
+    size_t buf_len = 0;
     size_t i;
     while (fgets(buf, MAX_BUF_READ, fp) != NULL) {
         buf[strcspn(buf, "\n")] = 0;
-        Line l = process_line(buf, strlen(buf));
+        buf_len = strlen(buf);
+        assert(buf_len < MAX_BUF_READ);
+        Line l = process_line(buf, buf_len);
         for (i = 0; i < args->num_of_actions; i++) {
             Action a = process_actions(args->actions_str[i], strlen(args->actions_str[i]));
             eval_action_on_line(&l, &a);
@@ -66,9 +71,10 @@ static Args handle_args(int argc, char **argv)
     char *macro_str = NULL;
     char *file_name = NULL;
     bool pretty_print = false;
+    bool stdout_input = false;
     char c;
     // FIXME: values from optarg might get overwritten
-    while ((c = getopt(argc, argv, ":d:m:f:p")) != -1) {
+    while ((c = getopt(argc, argv, ":d:m:f:ps")) != -1) {
         switch (c) {
             case 'd':
                 delim = optarg;
@@ -84,6 +90,9 @@ static Args handle_args(int argc, char **argv)
                 break;
             case 'p':
                 pretty_print = true;
+                break;
+            case 's':
+                stdout_input = true;
                 break;
             case ':':
                 printf("ERROR: Option needs value\n");
@@ -111,9 +120,7 @@ static Args handle_args(int argc, char **argv)
     }
     
     if (file_name == NULL) {
-        ERROR("file name is missing");
-        print_help();
-        exit(-1);
+        stdout_input = true;
     }
 
     token = strtok(macro_str, delim);
@@ -134,7 +141,7 @@ static Args handle_args(int argc, char **argv)
         exit(-1);
     }
 
-    Args args = {actions_str, file_name, actions_str_count, pretty_print};
+    Args args = {actions_str, file_name, actions_str_count, pretty_print, stdout_input};
     return args;
 
 }
