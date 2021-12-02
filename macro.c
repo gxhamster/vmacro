@@ -512,12 +512,12 @@ Line *eval_action_on_line(Line *l, Action *a)
     return l;
 }
 
-bool is_delim(char c)
+inline bool is_delim(char c)
 {
     return !isalnum(c) || isspace(c);
 }
 
-bool is_delim_whitespace(char c)
+inline bool is_delim_whitespace(char c)
 {
     return (c == ' ' || c == '\t') ? true : false; 
 }
