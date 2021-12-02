@@ -346,6 +346,13 @@ size_t word_idx_from_cursor(Line *l)
             return i;
         }
     }
+    
+    // To handle when there is a space as the last char
+    // Otherwise it would just return 0 as the index  
+    if (l->cursor > l->words[l->n_words - 1].end)
+        return l->n_words - 1;  
+    else if (l->cursor < l->words[0].start)
+        return 0;
 
     return l->cur_word_idx;
 }
