@@ -20,7 +20,7 @@ typedef struct {
 } Args;
 
 
-void free_args(Args *args)
+static void free_args(Args *args)
 {
     free(args->actions_str);
     args->file_name = NULL;
@@ -93,15 +93,12 @@ static Args handle_args(int argc, char **argv)
         switch (c) {
             case 'd':
                 delim = optarg;
-                // printf("Delim: %s\n", delim);
                 break;
             case 'm':
                 macro_str = optarg;
-                // printf("Macro: %s\n", macro_str);
                 break;
             case 'f':
                 file_name = optarg;
-                // printf("File: %s\n", file_name);
                 break;
             case 'p':
                 pretty_print = true;
@@ -174,11 +171,6 @@ int main(int argc, char **argv)
     read_from_file(fp, &args);
     free_args(&args);
     
-    //char *str = "hello-world--again";
-    //Line l = process_line(str, strlen(str));
-    //Action a = process_actions("2w", 3);
-    //eval_action_on_line(&l, &a);
-
     return 0;
 }
 
