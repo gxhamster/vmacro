@@ -82,6 +82,9 @@ void movement_word_backward(Line *l, Action *a)
     if (a->command == DELETE) {
         action_delete_word_backward(l, a);
         return;
+    } else if (a->command == YANK) {
+        action_yank_word_backward(l, a);
+        return;
     }
     size_t i;
     for (i = 0; i < a->mov.count; i++) {
@@ -447,6 +450,27 @@ void action_yank_word_forward(Line *l, Action *a)
 
     //Put cursor back at original pos
     l->cursor = start;
+}
+
+void action_yank_word_backward(Line *l, Action *a)
+{
+    size_t i;
+    char *start, *end;
+    start = l->cursor;
+    end = l->cursor - 1;
+    for (i = 0; i < a->mov.count; i++) {
+        prev_word_start(l);
+    }
+
+
+    start = l->cursor;
+    size_t buf_len = end - start + 1;
+    clear_yank_buffer();
+    yank_buffer.len = buf_len;
+    line_copy_range(l, start, end, yank_buffer.buf, yank_buffer.len);
+
+    //Put cursor back at original pos
+    l->cursor = end + 1;
 }
 
 // Paste action
