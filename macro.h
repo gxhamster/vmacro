@@ -48,6 +48,8 @@ Line *set_cursor_at_start(Line *l);
 Line *set_cursor_at_end(Line *l);
 char *line_search_str(Line *l, char *str, size_t count);
 char *line_search_str_backward(Line *l, char *str, size_t count);
+char *line_copy_range(Line *l, char *start, char *end, char *buffer, size_t buffer_len);
+void insert_at_cursor(Line *l, char *str, size_t str_len);
 
 char *line_get_end_ptr(Line *l);
 bool is_at_line(Line *l, char *ptr);

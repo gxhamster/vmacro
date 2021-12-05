@@ -6,7 +6,10 @@
 
 // Please add any new movement or action here too
 const KeyVal mapped_actions[] = {
-    {'d', DELETE}, {'i', INSERT},
+    {'d', DELETE}, 
+    {'i', INSERT},
+    {'y', YANK},
+    {'p', PASTE}
 };
 
 const KeyVal mapped_movements[] = {
@@ -24,11 +27,17 @@ const KeyVal mapped_movements[] = {
     {'?', SEARCH_BACKWARD}
 };
 
+// Global Yank buffer
+YankBuffer yank_buffer = {0};
+
 // Movements
 void movement_forward(Line *l, Action *a)
 {
     if (a->command == DELETE) {
         action_delete_forward(l, a);
+        return;
+    } else if (a->command == YANK) {
+        action_yank_forward(l, a); 
         return;
     }
     size_t i;
@@ -42,7 +51,11 @@ void movement_backward(Line *l, Action *a)
     if (a->command == DELETE) {
         action_delete_backward(l, a);
         return;
+    } else if (a->command == YANK) {
+        action_yank_backward(l, a);
+        return;
     }
+
     size_t i;
     for (i = 0; i < a->mov.count; i++) {
         prev_char(l);
@@ -347,34 +360,9 @@ void action_delete_till_backward(Line *l, Action *a)
 }
 
 // Insert action function
-#define TEMP_BUF_LEN 200
 void action_insert_at_cursor(Line *l, Action *a)
 {
-    char buf[TEMP_BUF_LEN] = {0};
-    char *temp_buf = buf;
-    // If cursor is at end of line insert after cursor
-    int cur_offset = (l->cursor == line_get_end_ptr(l)) ? l->cursor - l->src + 1 : l->cursor - l->src;
-    // Copy everything before cursor
-    memcpy(temp_buf, l->src, cur_offset);
-    // Copy insert text at cursor
-    memcpy(temp_buf + cur_offset, a->ins.text, a->ins.len);
-    char *last_pos_src = &l->src[l->len];
-    // Copy whats left of src to temp_buf
-    memcpy(temp_buf + cur_offset + a->ins.len, l->src + cur_offset, last_pos_src - l->cursor + 1);
-    
-    // Create new line with new src
-    size_t prev_word_idx = l->cur_word_idx;
-    size_t new_len = strlen(buf);
-    free_line(l);
-    Line l_new = process_line(buf, new_len);
-    *l = l_new;
-
-    l->cursor = l->src + cur_offset;
-    if (is_delim_whitespace(*l->cursor)) {
-        l->cur_word_idx = prev_word_idx;
-    } else {
-        l->cur_word_idx = word_idx_from_cursor(l);
-    }
+    insert_at_cursor(l, a->ins.text, a->ins.len);
 }
 
 void action_delete_search(Line *l, Action *a)
@@ -409,7 +397,46 @@ void action_delete_search_backward(Line *l, Action *a)
     }
 }
 
+// Yank actions
+void action_yank_forward(Line *l, Action *a)
+{
+    (void) a;
+    size_t buf_len = (l->cursor + a->mov.count) - l->cursor;
+    clear_yank_buffer();
+
+    yank_buffer.len = buf_len;
+    line_copy_range(l, l->cursor, l->cursor + a->mov.count - 1, yank_buffer.buf, buf_len); 
+}
+
+void action_yank_backward(Line *l, Action *a)
+{
+    (void) a;
+    size_t buf_len = (l->cursor - 1) - (l->cursor - a->mov.count) + 1;
+    clear_yank_buffer();
+
+    yank_buffer.len = buf_len;
+    line_copy_range(l, l->cursor - a->mov.count, l->cursor - 1, yank_buffer.buf, buf_len); 
+}
+
+// Paste action
+void action_paste_at_cursor(Line *l, Action *a)
+{
+    (void) a;
+    // Empty buffer
+    if (yank_buffer.len == 0)
+        return;
+
+    next_char(l);
+    insert_at_cursor(l, yank_buffer.buf, yank_buffer.len); 
+}
+
 // Helper functions
+
+void clear_yank_buffer()
+{
+    memset(yank_buffer.buf, 0, YANK_BUF_MAX);
+    yank_buffer.len = 0;
+}
 
 bool is_movement(char c)
 {

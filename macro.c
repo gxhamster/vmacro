@@ -462,6 +462,58 @@ Line *line_delete_range(Line *l, char *start, char *end)
     return l;
 }
 
+// Insert a string at cursor 
+#define TEMP_BUF_LEN 200
+void insert_at_cursor(Line *l, char *str, size_t str_len)
+{
+    char buf[TEMP_BUF_LEN] = {0};
+    char *temp_buf = buf;
+    // If cursor is at end of line insert after cursor
+    int cur_offset = (l->cursor == line_get_end_ptr(l)) ? l->cursor - l->src + 1 : l->cursor - l->src;
+    // Copy everything before cursor
+    memcpy(temp_buf, l->src, cur_offset);
+    // Copy insert text at cursor
+    memcpy(temp_buf + cur_offset, str, str_len);
+    char *last_pos_src = &l->src[l->len];
+    // Copy whats left of src to temp_buf
+    memcpy(temp_buf + cur_offset + str_len, l->src + cur_offset, last_pos_src - l->cursor + 1);
+    
+    // Create new line with new src
+    size_t prev_word_idx = l->cur_word_idx;
+    size_t new_len = strlen(buf);
+    free_line(l);
+    Line l_new = process_line(buf, new_len);
+    *l = l_new;
+
+    l->cursor = l->src + cur_offset;
+    if (is_delim_whitespace(*l->cursor)) {
+        l->cur_word_idx = prev_word_idx;
+    } else {
+        l->cur_word_idx = word_idx_from_cursor(l);
+    }
+}
+// Copy from start to end into buffer
+char *line_copy_range(Line *l, char *start, char *end, char *buffer, size_t buffer_len)
+{
+    if (!start || !end) {
+        ERROR("cannot copy, start or buffer does not exist");
+        return NULL;
+    }
+    
+    if (!is_at_line(l, start) || !is_at_line(l, end)) {
+        ERROR("start or end does not lie on line");
+        return NULL;
+    }
+
+    size_t copy_len = end - start + 1;
+    if (buffer_len < copy_len) {
+        ERROR("cannot copy, buffer too small");
+        return NULL;
+    }
+    
+    memcpy(buffer, start, copy_len);
+    return buffer;
+}
 
 // Execute an action on a line
 Line *eval_action_on_line(Line *l, Action *a)
@@ -471,6 +523,11 @@ Line *eval_action_on_line(Line *l, Action *a)
     switch (a->command) {
         case INSERT:
             action_insert_at_cursor(l, a);
+            return l;
+    }
+    switch (a->command) {
+        case PASTE:
+            action_paste_at_cursor(l, a);
             return l;
     }
 

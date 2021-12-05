@@ -4,7 +4,7 @@
 #include "macro.h"
 
 // All actions and movements
-enum { DELETE = 1, INSERT };
+enum { DELETE = 1, INSERT, YANK, PASTE };
 enum { FORWARD = 1, BACKWARD, WORD_FORWARD, WORD_BACKWARD, 
        FIND, FIND_BACKWARD, TILL, TILL_BACKWARD, LINE_START, 
        LINE_END, SEARCH_FORWARD, SEARCH_BACKWARD }; 
@@ -35,6 +35,14 @@ typedef struct {
     Movement mov;
     Insert ins;
 } Action;
+
+// Structure to hold the copied text
+// There sould be one yank buffer
+#define YANK_BUF_MAX 200
+typedef struct {
+    char buf[YANK_BUF_MAX];
+    size_t len;
+} YankBuffer;
 
 Action process_actions(char *action_str, size_t len);
 Line *eval_action_on_line(Line *l, Action *a);
@@ -67,9 +75,25 @@ void action_delete_search_backward(Line *l, Action *a);
 
 void action_insert_at_cursor(Line *l, Action *a);
 
+void action_yank_forward(Line *l, Action *a);
+void action_yank_backward(Line *l, Action *a);
+void action_yank_word_forward(Line *l, Action *a);
+void action_yank_word_backward(Line *l, Action *a);
+void action_yank_to_line_start(Line *l, Action *a);
+void action_yank_to_line_end(Line *l, Action *a);
+void action_yank_to_find(Line *l, Action *a);
+void action_yank_to_find_backward(Line *l, Action *a);
+void action_yank_till(Line *l, Action *a);
+void action_yank_till_backward(Line *l, Action *a);
+void action_yank_search(Line *l, Action *a);
+void action_yank_search_backward(Line *l, Action *a);
+
+void action_paste_at_cursor(Line *l, Action *a);
+
 bool is_action(char c);
 bool is_movement(char c);
 int movement_get_value_for_key(char key);
+void clear_yank_buffer();
 int action_get_value_for_key(char key);
 
 #endif
