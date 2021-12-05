@@ -8,6 +8,7 @@ and execute that macro on each line on a file
 * Optimzing process_line
 * Add change command (Eg: cw)
   Will delete word and insert
+* Repeat the macro given a count from the cli -m "fd," -c 3
 
 -- Progress -- 
 

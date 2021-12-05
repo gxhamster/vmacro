@@ -15,6 +15,7 @@ typedef struct {
     char **actions_str;
     char *file_name;
     size_t num_of_actions;
+    int count;
     bool pretty_print;
     bool stdout_input;
 } Args;
@@ -37,14 +38,17 @@ static char *read_from_file(FILE *fp, Args *args)
     char buf[MAX_BUF_READ];
     size_t buf_len = 0;
     size_t i;
+    int j;
     while (fgets(buf, MAX_BUF_READ, fp) != NULL) {
         buf[strcspn(buf, "\n")] = 0;
         buf_len = strlen(buf);
         assert(buf_len < MAX_BUF_READ);
         Line l = process_line(buf, buf_len);
-        for (i = 0; i < args->num_of_actions; i++) {
-            Action a = process_actions(args->actions_str[i], strlen(args->actions_str[i]));
-            eval_action_on_line(&l, &a);
+        for (j = 0; j < args->count; j++) {
+            for (i = 0; i < args->num_of_actions; i++) {
+                Action a = process_actions(args->actions_str[i], strlen(args->actions_str[i]));
+                eval_action_on_line(&l, &a);
+            }
         }
         if (args->pretty_print) 
             pretty_print_line(&l);
@@ -85,11 +89,12 @@ static Args handle_args(int argc, char **argv)
     const char *delim = NULL;
     char *macro_str = NULL;
     char *file_name = NULL;
+    char *repeat_count = NULL;
     bool pretty_print = false;
     bool stdout_input = false;
     char c;
     // FIXME: values from optarg might get overwritten
-    while ((c = getopt(argc, argv, ":d:m:f:pshv")) != -1) {
+    while ((c = getopt(argc, argv, ":d:m:f:c:pshv")) != -1) {
         switch (c) {
             case 'd':
                 delim = optarg;
@@ -99,6 +104,9 @@ static Args handle_args(int argc, char **argv)
                 break;
             case 'f':
                 file_name = optarg;
+                break;
+            case 'c':
+                repeat_count = optarg;
                 break;
             case 'p':
                 pretty_print = true;
@@ -141,6 +149,13 @@ static Args handle_args(int argc, char **argv)
         stdout_input = true;
     }
 
+    int count = 1;
+    if (repeat_count != NULL) {
+        if ((count = atoi(repeat_count)) <= 0) {
+            count = 1;
+        } 
+    }
+
     token = strtok(macro_str, delim);
     if (token == NULL) {
         ERROR("Cannot identify any macros, Check delimeter");
@@ -159,7 +174,7 @@ static Args handle_args(int argc, char **argv)
         exit(-1);
     }
 
-    Args args = {actions_str, file_name, actions_str_count, pretty_print, stdout_input};
+    Args args = {actions_str, file_name, actions_str_count, count, pretty_print, stdout_input};
     return args;
 
 }
