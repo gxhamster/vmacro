@@ -290,6 +290,31 @@ Line *prev_word_start(Line *l)
 
 }
 
+// Move cursor end of 
+Line *prev_word_end(Line *l)
+{
+    // Because size_t is an unsigned int so cast to (int)
+    if ((int)l->cur_word_idx - 1 < 0) {
+        l->cursor = l->words[0].end;
+        l->cur_word_idx = 0;
+        return l;
+    }
+    char *end;
+    // If cursor in current word move it to end of cur word
+    Word *word = &l->words[l->cur_word_idx];
+    if (l->cursor > word->end) {
+        end = l->words[l->cur_word_idx].end;
+        l->cursor = end;
+        return l;
+    }
+
+    end = l->words[l->cur_word_idx - 1 ].end;      
+    l->cursor = end;
+    l->cur_word_idx -= 1; 
+
+    return l;
+}
+
 // Move to end of word 
 Line *next_word_end(Line *l)
 {

@@ -41,6 +41,7 @@ char *search_until_char_forward(Line *l, char c);
 char *search_until_char_backward(Line *l, char c);
 Line *next_word_end(Line *l);
 Line *next_word_start(Line *l);
+Line *prev_word_end(Line *l);
 Line *prev_word_start(Line *l);
 Line *next_char(Line *l);
 Line *prev_char(Line *l);

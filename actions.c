@@ -67,6 +67,9 @@ void movement_word_forward(Line *l, Action *a)
     if (a->command == DELETE) {
         action_delete_word_forward(l, a);
         return;
+    } else if (a->command == YANK) {
+        action_yank_word_forward(l, a);
+        return;
     }
     size_t i;
     for (i = 0; i < a->mov.count; i++) {
@@ -418,6 +421,34 @@ void action_yank_backward(Line *l, Action *a)
     line_copy_range(l, l->cursor - a->mov.count, l->cursor - 1, yank_buffer.buf, buf_len); 
 }
 
+void action_yank_word_forward(Line *l, Action *a) 
+{
+    size_t i;
+    char *start, *end;
+    size_t cur_idx = l->cur_word_idx;
+    start = l->cursor;
+    end = l->cursor;
+    for (i = 0; i < a->mov.count; i++) {
+        next_word_start(l);
+    }
+
+
+    if (l->cur_word_idx != l->n_words - 1 || cur_idx != l->cur_word_idx) {
+        prev_word_end(l);
+        end = l->cursor;
+    } else {
+        end = line_get_end_ptr(l);
+    }
+
+    size_t buf_len = end - start + 1;
+    clear_yank_buffer();
+    yank_buffer.len = buf_len;
+    line_copy_range(l, start, end, yank_buffer.buf, yank_buffer.len);
+
+    //Put cursor back at original pos
+    l->cursor = start;
+}
+
 // Paste action
 void action_paste_at_cursor(Line *l, Action *a)
 {
@@ -442,7 +473,7 @@ bool is_movement(char c)
 {
     size_t keyval_len;
     keyval_len = sizeof(mapped_movements) / sizeof(KeyVal);
-    
+
     size_t i;
     for (i = 0; i < keyval_len; i++) {
         if (c == mapped_movements[i].key) 
@@ -455,7 +486,7 @@ bool is_action(char c)
 {
     size_t keyval_len;
     keyval_len = sizeof(mapped_actions) / sizeof(KeyVal);
-    
+
     size_t i;
     for (i = 0; i < keyval_len; i++) {
         if (c == mapped_actions[i].key) 
@@ -468,7 +499,7 @@ int movement_get_value_for_key(char key)
 {
     size_t keyval_len;
     keyval_len = sizeof(mapped_movements) / sizeof(KeyVal);
-    
+
     size_t i;
     for (i = 0; i < keyval_len; i++) {
         if (key == mapped_movements[i].key) 
@@ -481,7 +512,7 @@ int action_get_value_for_key(char key)
 {
     size_t keyval_len;
     keyval_len = sizeof(mapped_actions) / sizeof(KeyVal);
-    
+
     size_t i;
     for (i = 0; i < keyval_len; i++) {
         if (key == mapped_actions[i].key) 

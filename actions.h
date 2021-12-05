@@ -89,6 +89,7 @@ void action_yank_search(Line *l, Action *a);
 void action_yank_search_backward(Line *l, Action *a);
 
 void action_paste_at_cursor(Line *l, Action *a);
+// TODO: paste backwards
 
 bool is_action(char c);
 bool is_movement(char c);
