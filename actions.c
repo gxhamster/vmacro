@@ -98,7 +98,11 @@ void movement_line_start(Line *l, Action *a)
     if (a->command == DELETE) {
         action_delete_to_line_start(l, a);
         return;
+    } else if (a->command == YANK) {
+        action_yank_to_line_start(l, a);
+        return;
     }
+
     set_cursor_at_start(l);      
 }
 
@@ -107,9 +111,12 @@ void movement_line_end(Line *l, Action *a)
     if (a->command == DELETE) {
         action_delete_to_line_end(l, a);
         return;
+    } else if (a->command == YANK) {
+        action_yank_to_line_end(l, a);
+        return;
     }
-    set_cursor_at_end(l);
 
+    set_cursor_at_end(l);
 }
 
 void movement_find(Line *l, Action *a)
@@ -471,6 +478,30 @@ void action_yank_word_backward(Line *l, Action *a)
 
     //Put cursor back at original pos
     l->cursor = end + 1;
+}
+
+void action_yank_to_line_start(Line *l, Action *a)
+{
+    (void) a;
+    char *end;
+    char *cur_pos = l->cursor;
+    prev_char(l);
+    end = l->cursor;
+    clear_yank_buffer();
+    yank_buffer.len = end - l->src + 1;
+    line_copy_range(l, l->src, end, yank_buffer.buf, yank_buffer.len);
+
+    l->cursor = cur_pos;
+}
+
+void action_yank_to_line_end(Line *l, Action *a)
+{
+    (void) a;
+    char *start;
+    start = l->cursor;
+    clear_yank_buffer();
+    yank_buffer.len = line_get_end_ptr(l) - start + 1;
+    line_copy_range(l, start, line_get_end_ptr(l), yank_buffer.buf, yank_buffer.len);
 }
 
 // Paste action
