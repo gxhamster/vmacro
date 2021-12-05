@@ -39,14 +39,21 @@ With most of these movments you can give a count of how many times to
 repeat it. An action can also given to it. Currently there is only delete
 and insert. 
 
+### Options
+- `-d` Delimeter to use when using multiple macros
+- `-f` Name of file to read from
+- `-c` Number of times to repeat macro
+- `-m` The macro to execute on each line
+
 ### Examples
 The -p flag will prettify the output, showing the location of
 the cursor. Omit it if you are outputting to a file instead.
+The -c flag will repeat the given macro a given number of times
 
 ```console
 ./macro -f test1 -m "$;4db;h;i Hello;f.;dh" -d ";" -p 
 ./macro -f test.txt -m "2l;dw" -d ";"
-./macro -f test.txt -m "2dw" > test1.txt
+./macro -f test.txt -m "2dw" -c 3 > test1.txt
 
 ```
 
