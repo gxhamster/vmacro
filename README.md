@@ -34,6 +34,8 @@ be when done over many lines.
 ##### Actions
 - `i` Insert characters at cursor
 - `d` Delete action (usually assciated with a movement)
+- `y` Yank (copy) (can be given movements)
+- `p` Paste yanked text at cursor
 
 With most of these movments you can give a count of how many times to 
 repeat it. An action can also given to it. Currently there is only delete
