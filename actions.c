@@ -186,6 +186,9 @@ void movement_till_backward(Line *l, Action *a)
     if (a->command == DELETE) {
         action_delete_till_backward(l, a);
         return;
+    } else if (a->command == YANK) {
+        action_yank_till_backward(l, a);
+        return;
     }
     char *cur_pos;
     size_t i;
@@ -567,6 +570,28 @@ void action_yank_till(Line *l, Action *a)
         if (a->mov.arg == 0)
             continue;
         end = search_until_char_forward(l, a->mov.arg);
+        l->cursor = end;
+        l->cur_word_idx = word_idx_from_cursor(l);
+    }
+    if (start == end)
+        return;
+
+    size_t buf_len = end - start + 1;
+    clear_yank_buffer();
+    yank_buffer.len = buf_len;
+    line_copy_range(l, start, end, yank_buffer.buf, yank_buffer.len);
+}
+
+void action_yank_till_backward(Line *l, Action *a)
+{
+    char *start, *end;
+    size_t i;
+    end = l->cursor;
+    start = l->cursor;
+    for (i = 0; i < a->mov.count; i++) {
+        if (a->mov.arg == 0)
+            continue;
+        start = search_until_char_backward(l, a->mov.arg);
         l->cursor = end;
         l->cur_word_idx = word_idx_from_cursor(l);
     }
