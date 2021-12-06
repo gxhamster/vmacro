@@ -206,6 +206,9 @@ void movement_search(Line *l, Action *a)
     if (a->command == DELETE) {
         action_delete_search(l, a);
         return;
+    } else if (a->command == YANK) {
+        action_yank_search(l, a);
+        return;
     }
     char *cur_pos;
     char *old_pos = l->cursor;
@@ -222,6 +225,9 @@ void movement_search_backward(Line *l, Action *a)
 {
     if (a->command == DELETE) {
         action_delete_search_backward(l, a);
+        return;
+    } else if (a->command == YANK) {
+        action_yank_search_backward(l, a);
         return;
     }
     char *cur_pos;
@@ -603,6 +609,43 @@ void action_yank_till_backward(Line *l, Action *a)
     yank_buffer.len = buf_len;
     line_copy_range(l, start, end, yank_buffer.buf, yank_buffer.len);
 }
+
+void action_yank_search(Line *l, Action *a)
+{
+    char *cur_pos;
+    char *old_pos = l->cursor;
+    if (a->mov.s_text.text[0] == '\0')
+        return;
+    next_char(l);
+    cur_pos = line_search_str(l, a->mov.s_text.text, a->mov.count);
+    cur_pos = (cur_pos) ? cur_pos : old_pos;
+
+    if (cur_pos != old_pos) {
+        size_t buffer_len = (cur_pos - 1) - old_pos + 1;
+        clear_yank_buffer();
+        yank_buffer.len = buffer_len;
+        line_copy_range(l, old_pos, cur_pos - 1, yank_buffer.buf, yank_buffer.len);
+    }
+}
+
+void action_yank_search_backward(Line *l, Action *a)
+{
+    char *cur_pos;
+    char *old_pos = l->cursor;
+    if (a->mov.s_text.text[0] == '\0')
+        return;
+    prev_char(l);
+    cur_pos = line_search_str_backward(l, a->mov.s_text.text, a->mov.count);
+    cur_pos = (cur_pos) ? cur_pos : old_pos;
+    if (cur_pos != old_pos) {
+        size_t buffer_len = old_pos - (cur_pos + 1) + 1;
+        clear_yank_buffer();
+        yank_buffer.len = buffer_len;
+        line_copy_range(l, cur_pos + 1, old_pos, yank_buffer.buf, yank_buffer.len);
+    }
+}
+
+
 
 // Paste action
 void action_paste_at_cursor(Line *l, Action *a)
