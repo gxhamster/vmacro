@@ -8,7 +8,7 @@
 #include "actions.h"
 
 #define NAME vmacro
-#define VERSION "0.1"
+#define VERSION "0.1.2"
 #define AUTHOR "gxhamster"
 
 typedef struct {
@@ -35,8 +35,15 @@ static char *read_from_file(FILE *fp, Args *args)
         fp = stdin;
     }
 
+    Action actions_arr[args->num_of_actions];
+    size_t k;
+    for (k = 0; k < args->num_of_actions; k++) {
+        actions_arr[k] = process_actions(args->actions_str[k], strlen(args->actions_str[k]));
+    }
+
     char buf[MAX_BUF_READ];
     size_t buf_len = 0;
+    Action *ap = NULL;
     size_t i;
     int j;
     while (fgets(buf, MAX_BUF_READ, fp) != NULL) {
@@ -44,12 +51,14 @@ static char *read_from_file(FILE *fp, Args *args)
         buf_len = strlen(buf);
         assert(buf_len < MAX_BUF_READ);
         Line l = process_line(buf, buf_len);
+
         for (j = 0; j < args->count; j++) {
             for (i = 0; i < args->num_of_actions; i++) {
-                Action a = process_actions(args->actions_str[i], strlen(args->actions_str[i]));
-                eval_action_on_line(&l, &a);
+                ap = &actions_arr[i];
+                eval_action_on_line(&l, ap);
             }
         }
+
         if (args->pretty_print) 
             pretty_print_line(&l);
         else
