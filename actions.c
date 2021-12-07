@@ -9,7 +9,8 @@ const KeyVal mapped_actions[] = {
     {'d', DELETE}, 
     {'i', INSERT},
     {'y', YANK},
-    {'p', PASTE}
+    {'p', PASTE},
+    {'P', PASTE_BACKWARD}
 };
 
 const KeyVal mapped_movements[] = {

@@ -559,6 +559,9 @@ Line *eval_action_on_line(Line *l, Action *a)
         case PASTE:
             action_paste_at_cursor(l, a);
             return l;
+        case PASTE_BACKWARD:
+            action_paste_backward_at_cursor(l, a);
+            return l;
     }
 
     switch (a->mov.command) {

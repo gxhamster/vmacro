@@ -4,7 +4,7 @@
 #include "macro.h"
 
 // All actions and movements
-enum { DELETE = 1, INSERT, YANK, PASTE };
+enum { DELETE = 1, INSERT, YANK, PASTE, PASTE_BACKWARD };
 enum { FORWARD = 1, BACKWARD, WORD_FORWARD, WORD_BACKWARD, 
        FIND, FIND_BACKWARD, TILL, TILL_BACKWARD, LINE_START, 
        LINE_END, SEARCH_FORWARD, SEARCH_BACKWARD, MATCH }; 
@@ -92,7 +92,7 @@ void action_yank_search_backward(Line *l, Action *a);
 void action_yank_match_pair(Line *l, Action *a);
 
 void action_paste_at_cursor(Line *l, Action *a);
-// TODO: paste backwards
+void action_paste_backward_at_cursor(Line *l, Action *a);
 
 bool is_action(char c);
 bool is_movement(char c);

@@ -223,9 +223,30 @@ void action_yank_search_backward(Line *l, Action *a)
 
 void action_yank_match_pair(Line *l, Action *a) 
 {
-    (void) l;
     (void) a;
-    // Implement
+    char *cur_pos = l->cursor;
+    char cur_char = (is_at_line(l, cur_pos)) ? *(cur_pos) : 0;
+
+    char matching_char = get_matching_char(cur_char);
+    if (matching_char == 0)
+        return;
+
+    char *search_pos;
+    search_pos = (is_opening(cur_char)) ? search_char_forward(l, matching_char) : search_char_backward(l, matching_char);
+     
+    if (search_pos == cur_pos)
+        return;
+
+    // line_copy_range might have problems with 
+    // calculation if start is bigger than end
+    char *near, *far;
+    near = (cur_pos < search_pos) ? cur_pos : search_pos;
+    far = (cur_pos > search_pos) ? cur_pos : search_pos;
+
+    size_t buf_len = far - near + 1;
+    clear_yank_buffer();
+    yank_buffer.len = buf_len;
+    line_copy_range(l, near, far, yank_buffer.buf, yank_buffer.len);
 }
 
 // Paste action
@@ -237,6 +258,16 @@ void action_paste_at_cursor(Line *l, Action *a)
         return;
 
     next_char(l);
+    insert_at_cursor(l, yank_buffer.buf, yank_buffer.len); 
+}
+
+void action_paste_backward_at_cursor(Line *l, Action *a)
+{
+    (void) a;
+    // Empty buffer
+    if (yank_buffer.len == 0)
+        return;
+
     insert_at_cursor(l, yank_buffer.buf, yank_buffer.len); 
 }
 
