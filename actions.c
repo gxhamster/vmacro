@@ -24,7 +24,15 @@ const KeyVal mapped_movements[] = {
     {'t', TILL},
     {'T', TILL_BACKWARD},
     {'/', SEARCH_FORWARD},
-    {'?', SEARCH_BACKWARD}
+    {'?', SEARCH_BACKWARD},
+    {'%', MATCH}
+};
+
+#define PAIR_MAX 2
+const char matching_pairs[][PAIR_MAX] = {
+    {'{', '}'},
+    {'[', ']'},
+    {'(', ')'}
 };
 
 // Movements
@@ -238,10 +246,63 @@ void movement_search_backward(Line *l, Action *a)
     l->cur_word_idx = word_idx_from_cursor(l);
 }
 
+void movement_match_pair(Line *l, Action *a)
+{
+    if (a->command == DELETE) {
+        action_delete_match_pair(l, a);
+        return;
+    } else if (a->command == YANK) {
+        action_yank_match_pair(l, a);
+        return;
+    }
+    char *cur_pos = l->cursor;
+    char cur_char = (is_at_line(l, cur_pos)) ? *(cur_pos) : 0;
+
+    char matching_char = get_matching_char(cur_char);
+    if (matching_char == 0)
+        return;
+
+    char *search_pos;
+    search_pos = (is_opening(cur_char)) ? search_char_forward(l, matching_char) : search_char_backward(l, matching_char);
+
+    l->cursor = search_pos;
+    l->cur_word_idx = word_idx_from_cursor(l);
+}
+
 // Insert action function
 void action_insert_at_cursor(Line *l, Action *a)
 {
     insert_at_cursor(l, a->ins.text, a->ins.len);
+}
+
+// Helper functions
+
+// Determine if char is a closing or opening char
+// Eg: ( is opening and ) is closing
+bool is_opening(char c)
+{
+    size_t matching_pair_arr_len = sizeof(matching_pairs) / sizeof(char) * 2;
+    size_t i;
+    for (i = 0; i < matching_pair_arr_len; i++) {
+        if (c == matching_pairs[i][0])
+            return true;
+    }
+    
+    return false;
+}
+
+// Get the matching character to c
+char get_matching_char(char c)
+{
+    size_t matching_pair_arr_len = sizeof(matching_pairs) / sizeof(char) * 2;
+    size_t i;
+    for (i = 0; i < matching_pair_arr_len; i++) {
+        if (matching_pairs[i][0] == c)
+            return matching_pairs[i][1];
+        else if (matching_pairs[i][1] == c)
+            return matching_pairs[i][0];
+    }
+    return 0;
 }
 
 bool is_movement(char c)

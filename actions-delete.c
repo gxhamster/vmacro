@@ -180,3 +180,22 @@ void action_delete_search_backward(Line *l, Action *a)
         line_delete_range(l, cur_pos + 1, old_pos);
     }
 }
+
+void action_delete_match_pair(Line *l, Action *a)
+{
+    (void) a;
+    char *cur_pos = l->cursor;
+    char cur_char = (is_at_line(l, cur_pos)) ? *(cur_pos) : 0;
+
+    char matching_char = get_matching_char(cur_char);
+    if (matching_char == 0)
+        return;
+
+    char *search_pos;
+    search_pos = (is_opening(cur_char)) ? search_char_forward(l, matching_char) : search_char_backward(l, matching_char);
+     
+    if (search_pos == cur_pos)
+        return;
+
+    line_delete_range(l, cur_pos, search_pos);
+}

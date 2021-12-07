@@ -221,6 +221,13 @@ void action_yank_search_backward(Line *l, Action *a)
     }
 }
 
+void action_yank_match_pair(Line *l, Action *a) 
+{
+    (void) l;
+    (void) a;
+    // Implement
+}
+
 // Paste action
 void action_paste_at_cursor(Line *l, Action *a)
 {
@@ -240,3 +247,4 @@ void clear_yank_buffer()
     memset(yank_buffer.buf, 0, YANK_BUF_MAX);
     yank_buffer.len = 0;
 }
+

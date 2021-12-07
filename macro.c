@@ -276,7 +276,7 @@ Line *prev_word_start(Line *l)
     char *start;
     // If cursor in current word move it to start of cur word
     Word *word = &l->words[l->cur_word_idx];
-    if (l->cursor > word->start && l->cursor <= word->end) {
+    if (l->cursor > word->start) {
         start = l->words[l->cur_word_idx].start;
         l->cursor = start;
         return l;
@@ -364,13 +364,18 @@ size_t word_idx_from_cursor(Line *l)
     size_t i;
     char *start;
     char *end;
-    for (i = 0; i < l->n_words; i++) {
+    for (i = 0; i < l->n_words - 1; i++) {
         start = l->words[i].start;
-        end = l->words[i].end;
-        if (l->cursor >= start && l->cursor <= end) {
+        end = l->words[i+1].start;
+        if (l->cursor >= start && l->cursor < end) {
             return i;
         }
     }
+    // Handle last word
+    start = l->words[l->n_words - 1].start;
+    end = l->words[l->n_words - 1].end;
+    if (l->cursor >= start && l->cursor <= end)
+        return l->n_words - 1;
     
     // To handle when there is a space as the last char
     // Otherwise it would just return 0 as the index  
@@ -592,6 +597,9 @@ Line *eval_action_on_line(Line *l, Action *a)
             break;
         case SEARCH_BACKWARD:
             movement_search_backward(l, a);
+            break;
+        case MATCH:
+            movement_match_pair(l, a);
             break;
         default:
             assert(0 && "Cannot identify the movement\n");

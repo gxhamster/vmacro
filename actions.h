@@ -7,7 +7,7 @@
 enum { DELETE = 1, INSERT, YANK, PASTE };
 enum { FORWARD = 1, BACKWARD, WORD_FORWARD, WORD_BACKWARD, 
        FIND, FIND_BACKWARD, TILL, TILL_BACKWARD, LINE_START, 
-       LINE_END, SEARCH_FORWARD, SEARCH_BACKWARD }; 
+       LINE_END, SEARCH_FORWARD, SEARCH_BACKWARD, MATCH }; 
 
 #define MAX_SEARCH_LEN 100
 typedef struct {
@@ -59,6 +59,7 @@ void movement_till(Line *l, Action *a);
 void movement_till_backward(Line *l, Action *a);
 void movement_search(Line *l, Action *a);
 void movement_search_backward(Line *l, Action *a);
+void movement_match_pair(Line *l, Action *a);
 
 void action_delete_word_forward(Line *l, Action *a);
 void action_delete_word_backward(Line *l, Action *a);
@@ -72,6 +73,7 @@ void action_delete_till(Line *l, Action *a);
 void action_delete_till_backward(Line *l, Action *a);
 void action_delete_search(Line *l, Action *a);
 void action_delete_search_backward(Line *l, Action *a);
+void action_delete_match_pair(Line *l, Action *a);
 
 void action_insert_at_cursor(Line *l, Action *a);
 
@@ -87,6 +89,7 @@ void action_yank_till(Line *l, Action *a);
 void action_yank_till_backward(Line *l, Action *a);
 void action_yank_search(Line *l, Action *a);
 void action_yank_search_backward(Line *l, Action *a);
+void action_yank_match_pair(Line *l, Action *a);
 
 void action_paste_at_cursor(Line *l, Action *a);
 // TODO: paste backwards
@@ -96,5 +99,7 @@ bool is_movement(char c);
 int movement_get_value_for_key(char key);
 void clear_yank_buffer();
 int action_get_value_for_key(char key);
+char get_matching_char(char c);
+bool is_opening(char c);
 
 #endif
