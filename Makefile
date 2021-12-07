@@ -7,7 +7,7 @@ SRC=main.c macro.c actions.c actions-yank.c actions-delete.c
 all: $(SRC)
 	$(CC) $(CFLAGS) -o $(OUT) $(SRC)
 
-debug: main.c macro.c actions.c
+debug: $(SRC)
 	$(CC) $(CFLAGS_G) -o $(OUT) $(SRC)
 
 clean:
