@@ -44,26 +44,29 @@ static char *read_from_file(FILE *fp, Args *args)
     char buf[MAX_BUF_READ];
     size_t buf_len = 0;
     Action *ap = NULL;
+    Line *l = NULL;
     size_t i;
     int j;
+    // Set up
+    init_global_line();
     while (fgets(buf, MAX_BUF_READ, fp) != NULL) {
         buf[strcspn(buf, "\n")] = 0;
         buf_len = strlen(buf);
         assert(buf_len < MAX_BUF_READ);
-        Line l = process_line(buf, buf_len);
+        l = process_line(buf, buf_len);
 
         for (j = 0; j < args->count; j++) {
             for (i = 0; i < args->num_of_actions; i++) {
                 ap = &actions_arr[i];
-                eval_action_on_line(&l, ap);
+                eval_action_on_line(l, ap);
             }
         }
 
         if (args->pretty_print) 
-            pretty_print_line(&l);
+            pretty_print_line(l);
         else
-            printf("%s\n", l.src);
-        free_line(&l);
+            printf("%s\n", l->src);
+        free_line(l);
     }
     fclose(fp);
     return NULL;

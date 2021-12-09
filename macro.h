@@ -14,8 +14,8 @@ typedef struct {
 } KeyVal;
 
 // Word points to places on the actual src
-typedef struct { 
-    char *start; 
+typedef struct {
+    char *start;
     char *end;
     size_t len;
 } Word;
@@ -31,7 +31,7 @@ typedef struct {
 } Line;
 
 // Declarations
-Line process_line(char *buf_src, size_t size);
+Line *process_line(char *buf_src, size_t size);
 Line *line_delete_char_at_cursor(Line *l);
 Line *line_delete_char_at_cursor_optimized(Line *l);
 Line *line_delete_range(Line *l, char *start, char *end);
@@ -52,6 +52,7 @@ char *line_search_str_backward(Line *l, char *str, size_t count);
 char *line_copy_range(Line *l, char *start, char *end, char *buffer, size_t buffer_len);
 void insert_at_cursor(Line *l, char *str, size_t str_len);
 
+Line *init_global_line();
 char *line_get_end_ptr(Line *l);
 bool is_at_line(Line *l, char *ptr);
 size_t word_idx_from_cursor(Line *l);

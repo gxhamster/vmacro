@@ -2,14 +2,29 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdbool.h>
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <assert.h>
 #include "macro.h"
 #include "actions.h"
 
 // This files contains the implemantion for all the line functions
 
-// Free all memory associated with a line 
+
+Line *global_line = NULL;
+
+// This function should be called only once and before process_line
+Line *init_global_line()
+{
+    global_line = (Line *)malloc(sizeof(Line));
+    if (global_line == NULL) {
+        ERROR("Cannot allocate memory for global line");
+        exit(-1);
+    }
+    memset(global_line, 0, sizeof(Line));
+    return global_line;
+}
+
+// Free all memory associated with a line
 void free_line(Line *l)
 {
     assert(l != NULL);
@@ -23,7 +38,7 @@ void pretty_print_line(Line *l)
     printf(" ");
     char *i;
     for (i = l->src; i != l->cursor; i++) {
-        printf(" ");    
+        printf(" ");
     }
     printf("^\n");
 }
@@ -92,7 +107,7 @@ char *line_search_str(Line *l, char *str, size_t count)
     }
     if (prev_result)
         return prev_result;
-    
+
     return NULL;
 }
 
@@ -118,7 +133,7 @@ char *line_search_str_backward(Line *l, char *str, size_t count)
     }
     if (prev_result)
         return prev_result;
-    
+
     return NULL;
 }
 
@@ -160,7 +175,7 @@ char *search_char_forward(Line *l, char c)
 // Searches the line for c returns the postions before it
 char *search_until_char_forward(Line *l, char c)
 {
-    IS_LINE_NULL(l, NULL); 
+    IS_LINE_NULL(l, NULL);
     if (!is_at_line(l, l->cursor + 1)) {
         return l->cursor;
     }
@@ -176,7 +191,7 @@ char *search_until_char_forward(Line *l, char c)
 // Searches the line backwards for c returns the postions after it
 char *search_until_char_backward(Line *l, char c)
 {
-    IS_LINE_NULL(l, NULL); 
+    IS_LINE_NULL(l, NULL);
     if (!is_at_line(l, l->cursor - 1)) {
         return l->cursor;
     }
@@ -255,9 +270,9 @@ Line *next_char(Line *l)
 
     if (is_word_next) {
         if (next_cursor_pos > word->end && next_cursor_pos >= word_next->start) {
-            l->cur_word_idx += 1; 
+            l->cur_word_idx += 1;
         }
-    } 
+    }
 
     l->cursor += 1;
 
@@ -282,15 +297,15 @@ Line *prev_word_start(Line *l)
         return l;
     }
 
-    start = l->words[l->cur_word_idx - 1 ].start;      
+    start = l->words[l->cur_word_idx - 1 ].start;
     l->cursor = start;
-    l->cur_word_idx -= 1; 
+    l->cur_word_idx -= 1;
 
     return l;
 
 }
 
-// Move cursor end of 
+// Move cursor end of
 Line *prev_word_end(Line *l)
 {
     // Because size_t is an unsigned int so cast to (int)
@@ -308,14 +323,14 @@ Line *prev_word_end(Line *l)
         return l;
     }
 
-    end = l->words[l->cur_word_idx - 1 ].end;      
+    end = l->words[l->cur_word_idx - 1 ].end;
     l->cursor = end;
-    l->cur_word_idx -= 1; 
+    l->cur_word_idx -= 1;
 
     return l;
 }
 
-// Move to end of word 
+// Move to end of word
 Line *next_word_end(Line *l)
 {
 
@@ -331,8 +346,8 @@ Line *next_word_end(Line *l)
             return l;
         }
         next_word = &l->words[l->cur_word_idx + 1];
-        l->cursor = next_word->end; 
-        l->cur_word_idx += 1; 
+        l->cursor = next_word->end;
+        l->cur_word_idx += 1;
     }
 
     return l;
@@ -347,9 +362,9 @@ Line *next_word_start(Line *l)
             return l;
         }
     }
-    char *start = l->words[l->cur_word_idx+1].start;      
+    char *start = l->words[l->cur_word_idx+1].start;
     l->cursor = start;
-    l->cur_word_idx += 1; 
+    l->cur_word_idx += 1;
 
     return l;
 }
@@ -376,11 +391,11 @@ size_t word_idx_from_cursor(Line *l)
     end = l->words[l->n_words - 1].end;
     if (l->cursor >= start && l->cursor <= end)
         return l->n_words - 1;
-    
+
     // To handle when there is a space as the last char
-    // Otherwise it would just return 0 as the index  
+    // Otherwise it would just return 0 as the index
     if (l->cursor > l->words[l->n_words - 1].end)
-        return l->n_words - 1;  
+        return l->n_words - 1;
     else if (l->cursor < l->words[0].start)
         return 0;
 
@@ -395,16 +410,15 @@ Line *line_delete_char_at_cursor_optimized(Line *l)
     char *delete_char = l->cursor;
     char *last_char = line_get_end_ptr(l);
     size_t offset = l->cursor - l->src;
-    size_t new_size; 
+    size_t new_size;
 
     memmove(l->cursor, delete_char+1, last_char + 1 - delete_char);
-    
+
     new_size = ((int)l->len - 1 < 0) ? 0 : l->len -1;
 
-    Line l_new = process_line(l->src, new_size);
+    l = process_line(l->src, new_size);
     free_line(l);
 
-    *l = l_new;
     l->cursor = l->src + offset;
     l->cur_word_idx = word_idx_from_cursor(l);
 
@@ -428,15 +442,15 @@ Line *line_delete_char_at_cursor(Line *l)
     new_src[new_src_count] = '\0';
     size_t offset = l->cursor - l->src;
     free_line(l);
-    Line l_new = process_line(new_src, new_src_count);
-    *l = l_new;
+    l = process_line(new_src, new_src_count);
+
 
     l->cursor = l->src + offset;
     // If an empty line is at the cursor move back
     if (*l->cursor == '\0')
         prev_char(l);
 
-    l->cur_word_idx = word_idx_from_cursor(l); 
+    l->cur_word_idx = word_idx_from_cursor(l);
     return l;
 }
 
@@ -451,7 +465,7 @@ Line *line_delete_range(Line *l, char *start, char *end)
     }
     if (end < l->src || end > line_get_end_ptr(l)) {
         ERROR("end does not lie in the line");
-        return NULL; 
+        return NULL;
     }
     if (start == end) {
         // Somehow cursor moved forward in this scenario so cursor is set to start
@@ -460,13 +474,13 @@ Line *line_delete_range(Line *l, char *start, char *end)
         line_delete_char_at_cursor(l);
         return l;
     }
-    
+
     // which is near to start of line (for easier pointer calc)
     char *near;
     char *far;
     near = (start - l->src < end - l->src) ? start : end;
     far = (start - l->src > end - l->src) ? start : end;
-    
+
     size_t del_len = far - near + 1;
     char new_src[l->len - del_len + 1];
     size_t new_src_count = 0;
@@ -477,13 +491,12 @@ Line *line_delete_range(Line *l, char *start, char *end)
             new_src_count++;
         }
     }
-    
+
     size_t offset = near - l->src;
-    
+
     new_src[new_src_count] = '\0';
     free_line(l);
-    Line line = process_line(new_src, new_src_count);
-    *l = line;
+    l = process_line(new_src, new_src_count);
     l->cursor = l->src + offset;
     // If an empty line is at the cursor move back
     if (*l->cursor == '\0')
@@ -492,7 +505,7 @@ Line *line_delete_range(Line *l, char *start, char *end)
     return l;
 }
 
-// Insert a string at cursor 
+// Insert a string at cursor
 #define TEMP_BUF_LEN 200
 void insert_at_cursor(Line *l, char *str, size_t str_len)
 {
@@ -507,13 +520,12 @@ void insert_at_cursor(Line *l, char *str, size_t str_len)
     char *last_pos_src = &l->src[l->len];
     // Copy whats left of src to temp_buf
     memcpy(temp_buf + cur_offset + str_len, l->src + cur_offset, last_pos_src - l->cursor + 1);
-    
+
     // Create new line with new src
     size_t prev_word_idx = l->cur_word_idx;
     size_t new_len = strlen(buf);
     free_line(l);
-    Line l_new = process_line(buf, new_len);
-    *l = l_new;
+    l = process_line(buf, new_len);
 
     l->cursor = l->src + cur_offset;
     if (is_delim_whitespace(*l->cursor)) {
@@ -529,7 +541,7 @@ char *line_copy_range(Line *l, char *start, char *end, char *buffer, size_t buff
         ERROR("cannot copy, start or buffer does not exist");
         return NULL;
     }
-    
+
     if (!is_at_line(l, start) || !is_at_line(l, end)) {
         ERROR("start or end does not lie on line");
         return NULL;
@@ -540,7 +552,7 @@ char *line_copy_range(Line *l, char *start, char *end, char *buffer, size_t buff
         ERROR("cannot copy, buffer too small");
         return NULL;
     }
-    
+
     memcpy(buffer, start, copy_len);
     return buffer;
 }
@@ -608,7 +620,7 @@ Line *eval_action_on_line(Line *l, Action *a)
             assert(0 && "Cannot identify the movement\n");
     }
 
-    
+
     return l;
 }
 
@@ -619,37 +631,41 @@ inline bool is_delim(char c)
 
 inline bool is_delim_whitespace(char c)
 {
-    return (c == ' ' || c == '\t') ? true : false; 
+    return (c == ' ' || c == '\t') ? true : false;
 }
 
 enum { WORD_START, IN_WORD, IN_DELIM };
-Line process_line(char *buf_src, size_t size)
+Line *process_line(char *buf_src, size_t size)
 {
     if (buf_src == NULL) {
         ERROR("Buffer is empty");
         exit(-1);
     }
-    
+
     char *buf = malloc(size+1);
     memcpy(buf, buf_src, size + 1);
 
-    Line line;
-    memset(line.words, 0, sizeof(Word) * MAX_WORDS_IN_LINE);
-    line.len = size;
-    line.cursor = buf;
-    line.cur_word_idx = 0;
-    line.n_words = 0;
-    line.src = buf;
-    
-    Line *l = &line;
+    Line *line = global_line;
+    memset(line->words, 0, sizeof(Word) * MAX_WORDS_IN_LINE);
+    line->len = size;
+    line->cursor = buf;
+    line->cur_word_idx = 0;
+    line->n_words = 0;
+    line->src = buf;
+
+    Line *l = line;
     Word *w;
     int state = (is_delim(buf[0])) ? IN_DELIM : WORD_START;
+    bool delim = false;
+    bool whitespace = false;
     size_t i;
     for (i = 0; i < size+1; i++) {
         w = &l->words[l->n_words];
+        delim = is_delim(buf[i]);
+        whitespace = is_delim_whitespace(buf[i]);
         switch (state) {
             case IN_WORD:
-                if (is_delim(buf[i])) {
+                if (delim) {
                     state = IN_DELIM;
                     w->end = &buf[i - 1];
                     w->len = w->end - w->start + 1;
@@ -662,12 +678,12 @@ Line process_line(char *buf_src, size_t size)
                 }
                 break;
             case IN_DELIM:
-                if (!is_delim(buf[i])) {
+                if (!delim) {
                     state = WORD_START;
                     i--;
                 } else if (buf[i] == '\0') {
                     continue;
-                } else if (!is_delim_whitespace(buf[i])) {
+                } else if (!whitespace) {
                     w->start = &buf[i];
                     w->end = &buf[i];
                     w->len = 1;
@@ -683,7 +699,7 @@ Line process_line(char *buf_src, size_t size)
 
         }
     }
-    
+
     return line;
 
 }
